@@ -14,6 +14,7 @@ import AuthCallback from './pages/AuthCallback';
 //import ChatRoomList from './pages/ChatRoomList';
 //import ChatRoom from './pages/ChatRoom';
 import AddInfoPage from "./pages/AddInfoPage";
+import WritePage from "./pages/WritePage";
 
 function App() {
   return (
@@ -22,13 +23,14 @@ function App() {
         <Route path="/" element={<Layout />}>
           {/* 홈 화면 */}
           <Route index element={<HomePage />} />
-          <Route path="/login?logout" element={<HomePage />} />
 
           {/* 인증 관련 */}
           {/*<Route path="/auth" element={<AuthPage />} />*/}
           <Route path="/users/addInfo" element={<AddInfoPage />} />
           <Route path="/users/addInfo" element={<AddInfoPage />} />
 
+          {/* 상품 작성 관련 */}
+          <Route path="/write" element={<WritePage />} />
 
           {/* 카테고리 및 상품 관련 */}
           <Route path="/category" element={<CategoryPage />} />

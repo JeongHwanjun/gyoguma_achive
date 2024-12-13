@@ -2,7 +2,7 @@
 // HomePage.js 또는 ProductListPage.js
 import React, { useEffect, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ProductCard from '../components/category/ProductCard';
 import {
   setCurrentCategory,
@@ -160,6 +160,10 @@ const HomePage = () => {
           />
         </svg>
       </button>
+      <Link
+        to="/write"
+        className='fixed bottom-8 right-24 bg-green-600 text-white p-3 rounded-full shadow-lg hover:bg-green-700 transition-colors'
+        >글쓰기</Link>
     </div>
   );
 };

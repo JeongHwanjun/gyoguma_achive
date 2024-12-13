@@ -4,6 +4,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
+    userId : null,
     userEmail : null,
     accessToken: null,
     refreshToken : null,
@@ -13,12 +14,14 @@ const authSlice = createSlice({
   },
   reducers: {
     loginSuccess(state, action) {
+      state.userId = action.payload.userId;
       state.userEmail = action.payload.userEmail;
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
       state.isAuthenticated = true;
     },
     logout: (state) => {
+      state.userId = null;
       state.userEmail = null;
       state.accessToken = null;
       state.refreshToken = null;

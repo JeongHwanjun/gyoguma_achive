@@ -42,7 +42,7 @@ function AuthButton() {
       getUserEmail()
 
       // 홈으로 리다이렉트 (또는 원하는 페이지로)
-      navigate('/');
+      //navigate('/');
     }
   }, [navigate, dispatch]);
 

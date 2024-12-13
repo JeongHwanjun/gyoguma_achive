@@ -10,7 +10,7 @@ export const API = {
       axiosInstance.get(`/products/${productId}`),
 
     create: (data) =>
-      axiosInstance.post("/products", data),
+      axiosInstance.post("/products/", data),
 
     update: (productId, data) =>
       axiosInstance.patch(`/products/${productId}`, data),

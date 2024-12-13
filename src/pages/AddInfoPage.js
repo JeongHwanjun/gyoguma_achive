@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
+import axios from "axios";
 
 const AddInfoPage = () => {
   const [userInfo, setUserInfo] = useState({

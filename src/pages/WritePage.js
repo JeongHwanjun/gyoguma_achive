@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API } from '../api/index';
+import axiosInstance from '../api/axiosInstance';
 import ProductForm from '../components/Write/ProductForm'
 import { useSelector } from 'react-redux';
 
@@ -21,6 +22,7 @@ const WritePage = () => {
 
   // 사용자 정보
   const {userEmail, isAuthenticated} = useSelector((state) => state.auth)
+  console.log(isAuthenticated)
   useEffect(() => {
     if(!isAuthenticated){
       alert('로그인이 필요한 서비스입니다.')
@@ -107,22 +109,29 @@ const WritePage = () => {
       alert('제출 내용을 확인해 주세요.')
     }    
 
-    /*
-    const submitData = new FormData()
-    submitData.append('title', formData.title)
-    submitData.append('price', formData.price)
-    submitData.append('description', formData.description)
-    submitData.append('category', formData.category)
-    submitData.append('place', formData.place)
+    
+    const imageData = new FormData()
     selectedFiles.forEach((file) => {
-      submitData.append('images', file); // 키는 추후 수정 가능
+      imageData.append('images', file); // 키가 'images'여야 정상적으로 받을 수 있음
     });
-    */
-    // 이미지 데이터는 현재 받을 수 없는듯
-
+    
     try{
+      // 글 등록
       const response = await API.product.create(formData)
-      navigate(`/product/${response.data.result.productId}`) // 작성된 페이지로 이동시키기
+      const productId = response.data.result.productId
+      // 이미지 등록
+      const imageResponse = await axiosInstance.post(
+        `/products/${productId}/images`,
+        imageData,
+        {
+          headers : {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      )
+      console.log('이미지 업로드 성공 : ', imageResponse)
+      // 작성된 페이지로 이동시키기
+      navigate(`/product/${productId}`)
     } catch(err) {
       alert('제출에 문제가 발생했습니다.')
       console.log(err)
