@@ -6,9 +6,10 @@ import ChatParticipants from '../components/chat/ChatParticipants';
 import ChatProduct from '../components/chat/ChatProduct'
 import ChatCompleteButton from '../components/chat/ChatCompleteButton';
 import ScheduleContainer from '../components/chat/ScheduleContainer';
-import { useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { API } from '../api/index';
 import { connect, sendMessage, leaveChatRoom, enterChatRoom as enterChatRoomSocket, disconnect } from '../services/socket';
+import { useSelector } from 'react-redux';
 
 function ChatPage() {
   const [input, setInput] = useState('')
@@ -16,12 +17,19 @@ function ChatPage() {
   const [complete, setComplete] = useState(false)
   const [showSchedule, setShowSchedule] = useState(false)
   const [stompClient, setStompClient] = useState(null)
-  const params = useParams()
+  const {roomId} = useParams()
+  const {userId, userNickName, isAuthenticated} = useSelector((state) => state.auth)
 
   // 채팅방에 연결. socket을 연결, 구독하고 입장 메세지를 publish합니다.
   useEffect(() => {
+    // 로그인이 필요한 서비스임
+    if(!isAuthenticated) {
+      alert('로그인이 필요한 서비스입니다.')
+      Navigate('/')
+    }
+
     if(!stompClient || stompClient.connected) {
-      const client = connect(params.roomId, (message) => {
+      const client = connect(roomId, (message) => {
         setMessages((prev) => [...prev, JSON.parse(message.body)])
       })
 
@@ -29,15 +37,15 @@ function ChatPage() {
 
       client.onConnect = () => {
         console.log('WebSocket connected!');
-        client.subscribe(`/sub/chat/room/${params.roomId}`, (message) => {
+        client.subscribe(`/sub/chat/room/${roomId}`, (message) => {
           setMessages((prev) => [...prev, JSON.parse(message.body)]);
         });
         if (!hasEnteredRoom) { // Only send ENTER message once
         hasEnteredRoom = true;
         const enterMessage = {
-          roomId: params.roomId,
-          senderId: 1,
-          nickname: 'User1',
+          roomId: roomId,
+          senderId: userId,
+          nickname: userNickName,
           message: '',
           type: 'ENTER',
         };
@@ -48,15 +56,15 @@ function ChatPage() {
     }
 
     return () => {
-      if(stompClient) disconnect(params.roomId)
+      if(stompClient) disconnect(roomId)
     }
-  },[params.roomId, stompClient])
+  },[roomId, userId, userNickName, isAuthenticated, stompClient])
 
   // 채팅방 초기화, 과거의 채팅들을 가져옵니다.
   useEffect(() => {
     const initializeChatRoom = async () => {
       try{
-        const messageResponse = await API.chat.getMessages(params.roomId);
+        const messageResponse = await API.chat.getMessages(roomId);
         setMessages(messageResponse.data);
       } catch (error) {
         console.error('Error initializing chat room:', error);
@@ -64,31 +72,31 @@ function ChatPage() {
     }
 
     initializeChatRoom()
-  }, [params.roomId])
+  }, [roomId])
 
   // socket에 신규 메세지를 publish합니다.
-  const handleSendMessage = (message) => {
+  const handleSendMessage = useCallback((message) => {
     const chatMessage = {
-      roomId: params.roomId,
-      senderId: 1,
-      nickname: 'User1',
+      roomId: roomId,
+      senderId: userId,
+      nickname: userNickName,
       message: message,
       type: 'TALK',
     };
     sendMessage(stompClient, chatMessage);
-  };
+  },[roomId, stompClient, userId, userNickName])
 
   // leave 메세지를 publish하고 구독과 연결을 해지합니다.
-  const handleLeaveChatRoom = () => {
+  const handleLeaveChatRoom = useCallback(() => {
     const leaveMessage = {
-      roomId: params.roomId,
-      senderId: 1,
-      nickname: 'User1',
+      roomId: roomId,
+      senderId: userId,
+      nickname: userNickName,
       message: '',
       type: 'LEAVE',
     };
     leaveChatRoom(stompClient, leaveMessage);
-  };
+  },[roomId, stompClient, userId, userNickName])
 
   return (
     <div className='flex flex-row justify-center space-x-16 p-16'>

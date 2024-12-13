@@ -21,7 +21,7 @@ const WritePage = () => {
   const [selectedFiles, setSelectedFiles] = useState([])
 
   // 사용자 정보
-  const {userEmail, isAuthenticated} = useSelector((state) => state.auth)
+  const {userId, isAuthenticated} = useSelector((state) => state.auth)
   console.log(isAuthenticated)
   useEffect(() => {
     if(!isAuthenticated){
@@ -116,10 +116,16 @@ const WritePage = () => {
     });
     
     try{
+      setFormData((prev) => ({
+        ...prev,
+        memberId : userId
+      }))
+      console.log('Sending Data : ', formData)
       // 글 등록
       const response = await API.product.create(formData)
       const productId = response.data.result.productId
       // 이미지 등록
+      /*
       const imageResponse = await axiosInstance.post(
         `/products/${productId}/images`,
         imageData,
@@ -130,6 +136,7 @@ const WritePage = () => {
         }
       )
       console.log('이미지 업로드 성공 : ', imageResponse)
+      */
       // 작성된 페이지로 이동시키기
       navigate(`/product/${productId}`)
     } catch(err) {
