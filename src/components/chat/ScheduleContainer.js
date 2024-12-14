@@ -4,10 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 
 const ScheduleContainer = ({roomId}) => {
     const [selectedTimes, setSelectedTimes] = useState({});
-    const [availableTimes, setAvailableTimes] = useState({
-    "2024-12-11": [10, 11],
-    "2024-12-12": [15, 16],
-    });
+    const [availableTimes, setAvailableTimes] = useState({});
 
     // 금일로부터 7일, 09시~21시
     const today = new Date();

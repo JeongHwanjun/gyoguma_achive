@@ -11,6 +11,9 @@ const initialState = {
     '8': []   // 기타
   },
   currentCategory: 'all',
+  searchWord : '',
+  sortCriteria : 'date',
+  sortDirection : 'asc',
   loading: false,
   error: null,
   hasMore: true,

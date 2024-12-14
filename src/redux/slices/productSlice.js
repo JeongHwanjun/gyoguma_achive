@@ -73,7 +73,16 @@ const productSlice = createSlice({
     },
     clearCurrentProduct: (state) => {
       state.currentProduct = null;
-    }
+    },
+    setSearchWord: (state, action) => {
+      state.searchWord = action.payload;
+    },
+    setSortCriteria: (state, action) => {
+      state.sortCriteria = action.payload;
+    },
+    setSortDirection: (state, action) => {
+      state.sortDirection = action.payload;
+    },
   },
   extraReducers: (builder) => {
     //비동기 상태 처리
@@ -85,23 +94,48 @@ const productSlice = createSlice({
       })
       .addCase(fetchProductsByCategory.fulfilled, (state, action) => {
         //데이터 로드 성공 / 카테고리별 상품 필터링 및 저장
+        console.log('fetchProductByCategory fulfilled')
         state.loading = false;
         const { products, hasMore, totalPages, totalElements } = action.payload;
 
-        const filteredProducts = state.currentCategory === 'all'
+        // 카테고리별 필터링
+        const filteredByCategory = state.currentCategory === 'all'
           ? products
           : products.filter(product =>
             product?.categoryId?.toString() === state.currentCategory
           );
 
+        // 검색어 필터링
+        const filteredBySearchWord = state.searchWord
+          ? filteredByCategory.filter(product =>
+              product.title?.toLowerCase().includes(state.searchWord?.toLowerCase())
+            )
+          : filteredByCategory;
+        
+        // 정렬
+        const sorted = [...filteredBySearchWord].sort((a, b) => {
+          const valueA = state.sortCriteria === 'price' ? a.price : new Date(a.createdAt);
+          const valueB = state.sortCriteria === 'price' ? b.price : new Date(b.createdAt);
+      
+          if (state.sortDirection === 'asc') {
+            return valueA > valueB ? 1 : -1;
+          } else {
+            return valueA < valueB ? 1 : -1;
+          }
+        });
+
+        state.categoryProducts[state.currentCategory] = sorted;
+
+        /*
         if (state.page === 1) {
-          state.categoryProducts[state.currentCategory] = filteredProducts;
+          state.categoryProducts[state.currentCategory] = filteredBySearchWord;
         } else {
           state.categoryProducts[state.currentCategory] = [
             ...state.categoryProducts[state.currentCategory],
-            ...filteredProducts
+            ...filteredBySearchWord
           ];
         }
+          */
 
         state.hasMore = hasMore;
         state.totalPages = totalPages;
@@ -134,7 +168,10 @@ const productSlice = createSlice({
 export const {
   setCurrentCategory,
   setPage,
-  clearCurrentProduct
+  setSearchWord,
+  clearCurrentProduct,
+  setSortCriteria,
+  setSortDirection
 } = productSlice.actions;
 
 export default productSlice.reducer;

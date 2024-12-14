@@ -1,17 +1,27 @@
 // src/components/layout/Header.js
 import { Link } from "react-router-dom";
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Dashboard from "../dashboard/Dashboard";
 import InputField from "../common/InputField";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useDebounce } from "use-debounce";
+import { fetchProductsByCategory, setSearchWord } from "../../redux/slices/productSlice";
 
 function Header() {
+  const dispatch = useDispatch();
   const [searchText, setSearchText] = useState('');
-  const { isAuthenticated } = useSelector(state => state.auth);
+  const { currentCategory } = useSelector(state => state.product)
+  const [debouncedSearchText] = useDebounce(searchText, 200);
 
   const onSearchChange = useCallback(e => {
     setSearchText(e.target.value);
   }, []);
+
+  useEffect(() => {
+    dispatch(setSearchWord(debouncedSearchText))
+    // 검색어를 통해 상품 목록 변경
+    dispatch(fetchProductsByCategory({categoryId : currentCategory}))
+  },[currentCategory, debouncedSearchText, dispatch])
 
   return (
     <header className="bg-white shadow-md">
