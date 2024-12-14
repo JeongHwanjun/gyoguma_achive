@@ -99,14 +99,7 @@ const HomePage = () => {
             <option value="price_desc">가격 높은순</option>
           </select>
         </div>
-        <div className="flex gap-4">
-          <button
-            onClick={() => navigate('/write')}
-            className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-          >
-            상품 등록
-          </button>
-        </div>
+        
       </div>
 
       {/* 상품 목록 */}

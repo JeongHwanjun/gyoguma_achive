@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchProductById, clearCurrentProduct } from "../redux/slices/productSlice";
 
-const categoryMap = {
+const categories = {
   1: "전공서적",
   2: "운동용품",
   3: "의약품",
@@ -14,36 +14,37 @@ const categoryMap = {
   8: "기타",
 };
 
-const statusMap = {
-  "ON_SALED": "판매중",
-  "RESERVED": "예약중",
-  "SOLD_OUT": "판매완료",
+const locations = {
+  1: "AI공학관",
+  2: "중앙도서관",
+  3: "가천관",
+  4: "파스쿠찌",
+  5: "스타벅스앞",
 };
 
 function ProductDetailPage() {
-  const { id } = useParams();
+  const { productId } = useParams();
   const dispatch = useDispatch();
+  const [selectedImage, setSelectedImage] = useState(0);
 
-  // Redux state 구조에 맞게 selector 수정
   const currentProduct = useSelector(state => state.product.currentProduct);
   const loading = useSelector(state => state.product.loading);
   const error = useSelector(state => state.product.error);
 
-
   useEffect(() => {
-    // ID가 유효한지 확인
-    if (!id) {
+    if (!productId) {
       console.error("Invalid product ID");
       return;
     }
-    console.log("Fetching product with ID:", id); // 디버깅용
-    dispatch(fetchProductById(id));
-
-    // Cleanup function
+    dispatch(fetchProductById(productId));
     return () => {
       dispatch(clearCurrentProduct());
     };
-  }, [dispatch, id]);
+  }, [dispatch, productId]);
+
+  const handleImageClick = (index) => {
+    setSelectedImage(index);
+  };
 
   if (loading) {
     return <div className="flex justify-center items-center h-screen">로딩중...</div>;
@@ -64,57 +65,71 @@ function ProductDetailPage() {
         <div className="space-y-4">
           <div className="bg-white rounded-lg shadow-md p-4">
             <img
-              src={currentProduct.imageUrl || `https://via.placeholder.com/400x400`}
+              src={currentProduct.images?.[selectedImage]?.storedFileName || "https://via.placeholder.com/400x400"}
               alt={currentProduct.title}
               className="w-full aspect-square object-cover rounded-lg"
             />
           </div>
+          {/* 썸네일 이미지들 */}
+          {currentProduct.images && currentProduct.images.length > 1 && (
+            <div className="grid grid-cols-5 gap-2">
+              {currentProduct.images.map((image, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleImageClick(index)}
+                  className={`border-2 rounded-lg overflow-hidden ${
+                    selectedImage === index ? "border-green-500" : "border-gray-200"
+                  }`}
+                >
+                  <img
+                    src={image.storedFileName || "https://via.placeholder.com/80x80"}
+                    alt={`${currentProduct.title} ${index + 1}`}
+                    className="w-full aspect-square object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-
-        {/* 오른쪽 영역: 상품 정보 섹션 */}
-        <div className="space-y-6">
-          {/* 기본 정보 */}
+        <div className="space-y-4">
+          {/* 상품 정보 카드 */}
           <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="space-y-4">
-              <h1 className="text-2xl font-bold">{currentProduct?.title}</h1>
-              <div className="text-xl font-semibold">
-                {currentProduct?.price?.toLocaleString()}원
+            <div className="text-gray-600 space-y-4">
+              <p className="text-lg">{`판매자: ${currentProduct.nickname}`}</p>
+
+              <div className="flex items-center space-x-3 text-lg">
+                <span className="font-medium">카테고리:</span>
+                <span className="px-3 py-1.5 bg-gray-100 rounded-full">
+              {categories[currentProduct.categoryId] || "미분류"}
+            </span>
               </div>
-              <div className="text-gray-600">
-                <p>판매자: {currentProduct?.nickname}</p>
-                <p>상태: {currentProduct?.status ? statusMap[currentProduct.status] : "상태 없음"}</p>
+
+              <div className="flex items-center space-x-3 text-lg">
+                <span className="font-medium">거래장소:</span>
+                <span className="px-3 py-1.5 bg-gray-100 rounded-full">
+              {locations[currentProduct.locationId] || "위치 정보 없음"}
+            </span>
               </div>
+
+              <p className="text-lg">{`등록일: ${new Date(currentProduct.createdAt).toLocaleDateString()}`}</p>
             </div>
           </div>
 
-          {/* 구매 옵션 */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="space-y-4">
-
-              <div className="border-t pt-4">
-              </div>
-              <div className="flex gap-2">
-                <button className="flex-1 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                  구매하기
-                </button>
-                <button className="flex-1 py-3 border border-green-600 text-green-600 rounded-lg hover:bg-green-50">
-                  채팅하기
-                </button>
-              </div>
-            </div>
-          </div>
+          {/* 채팅하기 버튼 */}
+          <button
+            className="w-full py-4 text-lg bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+            채팅하기
+          </button>
         </div>
       </div>
 
-      {/* 하단 상세 정보 탭 */}
+      {/* 하단 상품 정보 */}
       <div className="mt-12 bg-white rounded-lg shadow-md">
         <div className="border-b">
           <div className="flex">
-            <button className="px-6 py-3 border-b-2 border-green-600 font-semibold">
+            <div className="px-6 py-3 border-b-2 border-green-600 font-semibold">
               상품정보
-            </button>
-            <button className="px-6 py-3">리뷰</button>
-            <button className="px-6 py-3">문의</button>
+            </div>
           </div>
         </div>
         <div className="p-6">

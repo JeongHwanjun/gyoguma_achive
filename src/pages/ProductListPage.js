@@ -1,5 +1,3 @@
-//ProductListPage.js
-
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -19,10 +17,24 @@ const ProductListPage = () => {
     error
   } = useSelector(state => state.product);
 
+  // 실제 카테고리 데이터에 맞게 매핑 수정
+  const categoryMapping = {
+    '전체': 'all',
+    '전공서적': '1',
+    '운동용품': '2',
+    '의약품': '3',
+    '생필품': '4',
+    '전자기기': '5',
+    '의류/신발/악세사리': '6',
+    '심부름': '7',
+    '기타': '8'
+  };
+
   const currentProducts = categoryProducts[currentCategory] || [];
 
   useEffect(() => {
-    dispatch(fetchProductsByCategory({ categoryId: currentCategory, page: 1 }));
+    const categoryId = categoryMapping[currentCategory];
+    dispatch(fetchProductsByCategory({ categoryId, page: 1 }));
   }, [dispatch, currentCategory]);
 
   const handleCategoryChange = (category) => {
@@ -30,7 +42,6 @@ const ProductListPage = () => {
   };
 
   const handleSort = (sortOrder) => {
-    // 정렬 로직 구현 필요
     console.log('Sort order:', sortOrder);
   };
 
@@ -48,15 +59,14 @@ const ProductListPage = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-4">
-      {/* 필터 및 검색 섹션 */}
       <div className="mb-6 space-y-4">
         <div className="flex justify-between items-center">
-          <div className="flex space-x-4">
-            {['전체', '전공서적', '운동용품', '의약품', '생필품', '전자기기'].map((category) => (
+          <div className="flex space-x-4 overflow-x-auto pb-2">
+            {Object.keys(categoryMapping).map((category) => (
               <button
                 key={category}
                 onClick={() => handleCategoryChange(category)}
-                className={`px-4 py-2 rounded-full ${
+                className={`px-4 py-2 rounded-full whitespace-nowrap ${
                   currentCategory === category
                     ? 'bg-green-600 text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -85,10 +95,12 @@ const ProductListPage = () => {
         </div>
       </div>
 
-      {/* 상품 목록 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {currentProducts.map(product => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard
+            key={product.productId}
+            product={product}
+          />
         ))}
       </div>
 

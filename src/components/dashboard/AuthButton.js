@@ -1,4 +1,3 @@
-// src/components/dashboard/AuthButton.js
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
@@ -27,11 +26,11 @@ function AuthButton() {
       // 토큰을 받아온 후, 해당 토큰을 인증에 사용해 현재 유저 이메일을 받아옴
       const getUserEmail = async () => {
         try {
-          const response = await axiosInstance.get('/members/byToken');
-          const userEmail = response.data.email
-          console.log('User Email:', userEmail);
+          const response = await axiosInstance.get('/token/users');
+          const memberId = response.data.userId;
+          console.log('User ID:', memberId);
           // dispatch로 전역에서 이용할 수 있도록 redux state 갱신
-          dispatch(loginSuccess({userEmail, accessToken, refreshToken}))
+          dispatch(loginSuccess({ memberId, accessToken, refreshToken }))
           // 이후 원하는 컴포넌트에서 useSelector로 언제든 로그인 정보 이용 가능
         } catch (error) {
           console.error('Failed to fetch user email:', error);
@@ -56,20 +55,12 @@ function AuthButton() {
 
   return (
     <div className="flex items-center gap-4">
-        <>
-          <button
-            onClick={handleLogin}
-            className="text-gyoguma-dark hover:text-gyoguma"
-          >
-            로그인
-          </button>
-          <Link
-            to="/register"
-            className="px-4 py-2 bg-gyoguma text-white rounded-lg hover:bg-gyoguma-dark"
-          >
-            회원가입
-          </Link>
-        </>
+      <button
+        onClick={handleLogin}
+        className="text-gyoguma-dark hover:text-gyoguma"
+      >
+        로그인
+      </button>
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { logout } from "../../redux/slices/authSlice";
 import UserProfile from "./UserProfile";
 import AuthButton from "./AuthButton";
 import ChatButton from "./ChatButton";
+import React, { useEffect } from "react";
 
 function Dashboard() {
   const dispatch = useDispatch();
@@ -14,6 +15,11 @@ function Dashboard() {
   const { isAuthenticated, userEmail } = useSelector(state => state.auth);
 
   console.log(userEmail)
+
+  // 디버깅을 위한 상태 출력 추가
+  useEffect(() => {
+    console.log('Auth State:', { isAuthenticated, userEmail });
+  }, [isAuthenticated, userEmail]);
 
   const handleLogout = async () => {
     try {
