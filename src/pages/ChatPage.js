@@ -6,8 +6,9 @@ import ChatParticipants from '../components/chat/ChatParticipants';
 import ChatProduct from '../components/chat/ChatProduct'
 import ChatCompleteButton from '../components/chat/ChatCompleteButton';
 import ScheduleContainer from '../components/chat/ScheduleContainer';
-import { Navigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { API } from '../api/index';
+import axiosInstance from '../api/axiosInstance';
 import { connect, sendMessage, leaveChatRoom, enterChatRoom as enterChatRoomSocket, disconnect } from '../services/socket';
 import { useSelector } from 'react-redux';
 
@@ -17,15 +18,31 @@ function ChatPage() {
   const [complete, setComplete] = useState(false)
   const [showSchedule, setShowSchedule] = useState(false)
   const [stompClient, setStompClient] = useState(null)
+  const [otherUser, setOtherUser] = useState({})
+  const [currentRoom, setCurrentRoom] = useState({})
+  const [product, setProduct] = useState({})
   const {roomId} = useParams()
+  const navigate = useNavigate()
   const {userId, userNickName, isAuthenticated} = useSelector((state) => state.auth)
+  
+  // leave 메세지를 publish하고 구독과 연결을 해지합니다.
+  const handleLeaveChatRoom = useCallback(() => {
+    const leaveMessage = {
+      roomId: roomId,
+      senderId: userId,
+      nickname: userNickName,
+      message: '',
+      type: 'LEAVE',
+    };
+    leaveChatRoom(stompClient, leaveMessage);
+  },[roomId, stompClient, userId, userNickName])
 
   // 채팅방에 연결. socket을 연결, 구독하고 입장 메세지를 publish합니다.
   useEffect(() => {
     // 로그인이 필요한 서비스임
     if(!isAuthenticated) {
       alert('로그인이 필요한 서비스입니다.')
-      Navigate('/')
+      navigate('/')
     }
 
     if(!stompClient || stompClient.connected) {
@@ -56,9 +73,12 @@ function ChatPage() {
     }
 
     return () => {
-      if(stompClient) disconnect(roomId)
+      if(stompClient){
+        handleLeaveChatRoom()
+        disconnect(roomId)
+      }
     }
-  },[roomId, userId, userNickName, isAuthenticated, stompClient])
+  },[roomId, userId, userNickName, isAuthenticated, stompClient, navigate, handleLeaveChatRoom])
 
   // 채팅방 초기화, 과거의 채팅들을 가져옵니다.
   useEffect(() => {
@@ -84,25 +104,42 @@ function ChatPage() {
       type: 'TALK',
     };
     sendMessage(stompClient, chatMessage);
+    setInput('')
   },[roomId, stompClient, userId, userNickName])
 
-  // leave 메세지를 publish하고 구독과 연결을 해지합니다.
-  const handleLeaveChatRoom = useCallback(() => {
-    const leaveMessage = {
-      roomId: roomId,
-      senderId: userId,
-      nickname: userNickName,
-      message: '',
-      type: 'LEAVE',
+  // 기초적인 정보를 가져옵니다(현재 채팅방, 사용자, 상품)
+  useEffect(() => {
+    const fetchInformation = async () => {
+      try {
+        const roomsResponse = await axiosInstance.get(`/chat/user/${userId}`);
+        const room = roomsResponse.data.find(room => room.roomId === roomId);
+  
+        if (!room) {
+          console.error("Room not found for this roomId.");
+          return;
+        }
+  
+        const otherUserId = Number(room.buyer) === userId ? room.seller : room.buyer;
+        const otherUserInfo = await axiosInstance.get(`/members/${otherUserId}`);
+        
+        const productInfo = await axiosInstance.get(`/products/${room.product}`)
+
+        setCurrentRoom(room); // 상태 업데이트
+        setOtherUser(otherUserInfo.data.result); // 상대방 정보 업데이트
+        setProduct(productInfo.data.result) // 상품 정보 업데이트
+      } catch (e) {
+        console.error('Error on Fetching Data : ', e);
+      }
     };
-    leaveChatRoom(stompClient, leaveMessage);
-  },[roomId, stompClient, userId, userNickName])
+  
+    fetchInformation();
+  }, [roomId, userId]);
 
   return (
     <div className='flex flex-row justify-center space-x-16 p-16'>
       <div className="flex flex-col w-96 h-[724px] mx-auto border border-orange-300 rounded-lg bg-orange-50">
-        <ChatParticipants buyerName={'상대방'} />
-        <ChatProduct product={{title : 'title', price : '3020'}} />
+        <ChatParticipants otherUser={otherUser} />
+        <ChatProduct product={product} />
         <ChatMessage messages={messages} />
         <ChatInput onSendMessage={handleSendMessage} value={input} onChange={(e) => setInput(e.target.value)} />
         <div className='flex flex-row'>
@@ -111,7 +148,7 @@ function ChatPage() {
               className="bg-blue-500 text-white px-4 py-2 rounded-md"
               onClick={() => setShowSchedule((prev) => !prev)}
               >
-                {showSchedule ? "스케줄표 숨기기" : "스케줄표 보이기"}
+                {showSchedule ? "스케줄표 OFF" : "스케줄표 ON"}
             </button>
           </div>
           <ChatCompleteButton Complete={complete} setComplete={setComplete} />

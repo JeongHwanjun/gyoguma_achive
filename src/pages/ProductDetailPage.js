@@ -49,27 +49,33 @@ function ProductDetailPage() {
   }, [dispatch, productId]);
 
   const createOrGetChatRoom = async () => {
-    const buyerId = userId
+    const buyerId = userId // 상품을 보는 사용자가 구매자임
     try{
       const existRoomResponse = await axiosInstance.get(`/chat/buyer/${buyerId}`)
       const existRooms = existRoomResponse.data
       const existingRoom = existRooms?.find(
         (room) =>
-          room.buyer === userId && room.product === productId
+          room.buyer === buyerId && room.product === productId
       );
       //채팅방이 이미 있는가?
       if(existingRoom) {
         //채탕방이 있다면 그 채팅방으로 이동
-        return existingRoom
+        return existingRoom.roomId
       } 
+      // 채팅방이 없다면 새로 생성
+      // /members/products/{productId} 를 통해 sellerId를 받아올 수 있음.
+      const sellerIdResponse = await axiosInstance.get(`/members/products/${productId}`)
+      const sellerId = sellerIdResponse.data.userId
+      // 받아온 데이터를 기반으로 신규 채팅방 생성
       const createRoomResponse = await axiosInstance.post("/chat", {
         buyer: buyerId,
-        seller: 2, // sellerId를 받아오는 방법은? currentProduct.sellerId?
+        seller: sellerId,
         product: productId,
         senderId: buyerId,
       });
 
-      return createRoomResponse.data.roomId; // 새로 생성된 roomId 반환
+      // 새로 생성된 roomId 반환
+      return createRoomResponse.data.roomId; 
     } catch (error) {
       console.error("Error while creating or fetching chat room:", error);
       throw error;
@@ -79,7 +85,7 @@ function ProductDetailPage() {
   const moveToChat = async () => {
     try {
       const roomId = await createOrGetChatRoom()
-      navigate(`/chat/${roomId}`)
+      navigate(`/chat/transaction:${roomId}`)
     } catch(e) {
       console.error('채팅방 이동 실패 : ', error)
     }

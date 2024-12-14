@@ -7,9 +7,10 @@ import ProductForm from '../components/Write/ProductForm'
 import { useSelector } from 'react-redux';
 
 const WritePage = () => {
+  const {userId, isAuthenticated} = useSelector((state) => state.auth)
   // 상품 정보를 제어하는 state
   const [formData, setFormData] = useState({
-    memberId: 1,
+    memberId: userId,
     title: '',
     price: '',
     description: '',
@@ -21,7 +22,7 @@ const WritePage = () => {
   const [selectedFiles, setSelectedFiles] = useState([])
 
   // 사용자 정보
-  const {userId, isAuthenticated} = useSelector((state) => state.auth)
+  
   console.log(isAuthenticated)
   useEffect(() => {
     if(!isAuthenticated){
