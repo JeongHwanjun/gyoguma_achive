@@ -35,6 +35,8 @@ function ProductDetailPage() {
     const {userId} = useSelector(state => state.auth)
 
     useEffect(() => {
+        // 맨 위로 스크롤
+        window.scrollTo(0, 0);
         // ID가 유효한지 확인
         if (!productId) {
             console.error("Invalid product ID");
