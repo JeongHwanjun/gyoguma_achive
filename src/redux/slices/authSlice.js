@@ -22,7 +22,7 @@ export const login = createAsyncThunk(
 
       if (!response.data) {
         console.log('5-1. 응답 데이터가 없음');
-        throw new Error('응답 데이터가 없습니다.');
+          return rejectWithValue('응답 데이터 없습니다');
       }
 
       console.log('5-2. 토큰 추출 시도');
@@ -53,6 +53,50 @@ export const login = createAsyncThunk(
       return rejectWithValue(error.response?.data?.message || '로그인 실패');
     }
   }
+);
+
+export const checkAuthStatus = createAsyncThunk(
+    'auth/checkStatus',
+    async (_, { rejectWithValue }) => {
+      const accessToken = localStorage.getItem('access_token');
+      const refreshToken = localStorage.getItem('refresh_token');
+
+      if (!accessToken || !refreshToken) {
+        throw new Error('No tokens found');
+      }
+
+      try {
+        const decodedToken = jwtDecode(accessToken);
+        const currentTime = Date.now() / 1000;
+
+        if (decodedToken.exp < currentTime) {
+          // 토큰이 만료된 경우
+          const response = await axiosInstance.post('/auth/refresh', {
+            refreshToken
+          });
+
+          const { accessToken: newAccessToken } = response.data.result;
+          localStorage.setItem('access_token', newAccessToken);
+
+          return {
+            ...decodedToken,
+            accessToken: newAccessToken,
+            refreshToken
+          };
+        }
+
+        return {
+          userEmail: decodedToken.email,
+          memberId: decodedToken.memberId,
+          accessToken,
+          refreshToken
+        };
+      } catch (error) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        throw error;
+      }
+    }
 );
 
 const authSlice = createSlice({
@@ -114,7 +158,25 @@ const authSlice = createSlice({
         console.log('로그인 rejected 상태. error:', action.payload);
         state.loading = false;
         state.error = action.payload || '로그인 실패';
-      });
+      })
+        // checkAuthStatus cases 추가
+        .addCase(checkAuthStatus.pending, (state) => {
+          state.loading = true;
+        })
+        .addCase(checkAuthStatus.fulfilled, (state, action) => {
+          state.loading = false;
+          state.isAuthenticated = true;
+          state.userEmail = action.payload.userEmail;
+          state.memberId = action.payload.memberId;
+          state.accessToken = action.payload.accessToken;
+          state.refreshToken = action.payload.refreshToken;
+        })
+        .addCase(checkAuthStatus.rejected, (state) => {
+          state.loading = false;
+          state.isAuthenticated = false;
+          Object.assign(state, initialState);
+        });
+
   }
 });
 

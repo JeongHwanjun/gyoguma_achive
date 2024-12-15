@@ -6,7 +6,7 @@ import { loginSuccess } from '../redux/slices/authSlice'; // 수정됨
 
 const axiosInstance = axios.create({
   baseURL: 'http://localhost:8080',
-  timeout: 5000,
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -26,65 +26,50 @@ axiosInstance.interceptors.request.use(
 
 // Response Interceptor
 axiosInstance.interceptors.response.use(
-  (response) => {
-    // OAuth2 로그인 응답 처리
-    const accessToken = response.headers['authorization']?.replace('Bearer ', '');
-    const refreshToken = response.headers['refresh'];
-// Response Interceptor에서
-    if (accessToken) {
-      localStorage.setItem('access_token', accessToken);
+    (response) => {
+      // OAuth2 로그인 응답 처리
+      const accessToken = response.headers['authorization']?.replace('Bearer ', '');
+      const refreshToken = response.headers['refresh'];
 
-      try {
-        const decodedToken = jwtDecode(accessToken);
-        console.log('Decoded token:', decodedToken); // 토큰 내용 확인
-
-        const userData = {
-          email: decodedToken.email,
-          memberId: decodedToken.sub || decodedToken.id || decodedToken.memberId, // JWT의 구조에 따라 id 필드명이 다를 수 있음
-        };
-
-        console.log('Extracted user data:', userData); // 추출된 데이터 확인
-        store.dispatch(loginSuccess(userData));
-      } catch (error) {
-        console.error('Token decode error:', error);
+      // 토큰 저장만 수행
+      if (accessToken) {
+        localStorage.setItem('access_token', accessToken);
       }
-    }
+      if (refreshToken) {
+        localStorage.setItem('refresh_token', refreshToken);
+      }
 
-    if (refreshToken) {
-      localStorage.setItem('refresh_token', refreshToken);
-    }
+      return response;
+    },
+    async (error) => {
+      const originalRequest = error.config;
 
-    return response;
-  },
-  async (error) => {
-    const originalRequest = error.config;
+      if (error.response?.status === 401 && error.response?.data?.code === 'TOKEN_EXPIRED') {
+        if (!originalRequest._retry) {
+          originalRequest._retry = true;
 
-    if (error.response?.status === 401 && error.response?.data?.code === 'TOKEN_EXPIRED') {
-      if (!originalRequest._retry) {
-        originalRequest._retry = true;
+          try {
+            const refreshToken = localStorage.getItem('refresh_token');
+            const response = await axios.post('http://localhost:8080/refresh-token', null, {
+              headers: {
+                'Refresh': refreshToken
+              }
+            });
 
-        try {
-          const refreshToken = localStorage.getItem('refresh_token');
-          const response = await axios.post('http://localhost:8080/refresh-token', null, {
-            headers: {
-              'Refresh': refreshToken
-            }
-          });
-
-          const { access_token } = response.data;
-          localStorage.setItem('access_token', access_token);
-          originalRequest.headers.Authorization = `Bearer ${access_token}`;
-          return axiosInstance(originalRequest);
-        } catch (refreshError) {
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-          window.location.href = '/login';
-          return Promise.reject(refreshError);
+            const { access_token } = response.data;
+            localStorage.setItem('access_token', access_token);
+            originalRequest.headers.Authorization = `Bearer ${access_token}`;
+            return axiosInstance(originalRequest);
+          } catch (refreshError) {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            window.location.href = '/login';
+            return Promise.reject(refreshError);
+          }
         }
       }
+      return Promise.reject(error);
     }
-    return Promise.reject(error);
-  }
 );
 
 export default axiosInstance;

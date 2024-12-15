@@ -6,16 +6,24 @@ import ProductForm from '../components/Write/ProductForm'
 import { useSelector } from 'react-redux';
 
 const WritePage = () => {
-  const {userId, isAuthenticated} = useSelector((state) => state.auth)
-  // 상품 정보를 제어하는 state
+
+  const authState = useSelector((state) => state.auth);
+  // userId를 memberId로 사용
+  const { userId, isAuthenticated } = authState;
+
+  // formData 초기화에서도 userId 사용
   const [formData, setFormData] = useState({
-    memberId: userId,
+    memberId: userId, // userId 사용
     title: '',
     price: '',
     description: '',
     categoryId: 0,
     locationId: 0,
   });
+
+  useEffect(() => {
+    console.log('전체 Auth State:', authState);
+  }, [authState]);
 
   const [selectedFiles, setSelectedFiles] = useState([]);
   const navigate = useNavigate();
@@ -30,7 +38,7 @@ const WritePage = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      console.log('Auth state changed:' , { isAuthenticated, userId });
+      console.log('Auth state changed:' , { isAuthenticated, userId: userId });
       alert('로그인이 필요한 서비스입니다.');
       navigate('/');
     }
@@ -38,7 +46,7 @@ const WritePage = () => {
 
 
   useEffect(() => 
-    console.log('Auth state changed:', { isAuthenticated, userId })
+    console.log('Auth state changed:', { isAuthenticated, userId: userId })
   , [isAuthenticated, userId]);
   
   const handleChange = (e) => {

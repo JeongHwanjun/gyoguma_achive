@@ -140,6 +140,7 @@ const productSlice = createSlice({
         state.loading = false;
         const { products } = action.payload;
 
+
         // 카테고리별 필터링
         const filteredByCategory = state.currentCategory === 'all'
           ? products
@@ -155,7 +156,7 @@ const productSlice = createSlice({
           : filteredByCategory;
 
         // 정렬
-        const sorted = [...filteredBySearchWord].sort((a, b) => {
+          const sorted = [...filteredBySearchWord].sort((a, b) => {
           const valueA = state.sortCriteria === 'price' ? a.price : new Date(a.createdAt);
           const valueB = state.sortCriteria === 'price' ? b.price : new Date(b.createdAt);
 
