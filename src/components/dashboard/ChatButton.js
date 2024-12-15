@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 function ChatButton() {
   return (
-    <Link to="/chat/main" className="text-gyoguma-dark hover:text-gyoguma">
+    <Link to={'/chat/user'} className="text-gyoguma-dark hover:text-gyoguma">
       채팅
     </Link>
   );

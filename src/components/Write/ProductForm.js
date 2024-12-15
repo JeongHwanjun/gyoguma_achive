@@ -1,114 +1,24 @@
 // 상품 등록/수정 폼
 // 이미지 업로드, 카테고리, 위치, 시간 등 선택
-import React, { useState } from 'react';
-import axios from 'axios';
+import React from 'react';
 import InputField from '../common/InputField';
 import DropDownSelector from '../common/DropDownSelector';
 import TextArea from '../common/TextArea';
 import ImageUploader from '../common/ImageUploader';
-import { redirect } from 'react-router-dom';
 import Button from '../common/Button';
 import WritePlace from './WritePlace';
 
-export default function ProductForm() {
-  // 상품 정보를 관리하는 상태입니다
-  const [formData, setFormData] = useState({
-    title: '',
-    price: '',
-    description: '',
-    category: '0',
-    place: '0',
-  });
-  const [selectedFiles, setSelectedFiles] = useState([])
+export default function ProductForm({
+  calculateProgress,
+  onSubmit,
+  setSelectedFiles,
+  handleChange,
+  formData,
+  feedback,
+}) {
+  
 
-  // 피드백 정보를 관리하는 상태입니다
-  const [feedback, setFeedback] = useState({
-    titleLength: 0,
-    titleValid: true,
-    priceValid: true,
-    categoryValid : true,
-    imageValid : true,
-    placeValid : true,
-  });
-
-  // 입력 필드 값이 변경될 때 호출되는 함수입니다
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-
-    // 실시간 유효성 검사를 수행합니다
-    if (name === 'title') {
-      setFeedback(prev => ({
-        ...prev,
-        titleLength: value.length,
-        titleValid: value.length >= 5 && value.length <= 100
-      }));
-    }
-
-    if (name === 'price') {
-      const numberValue = Number(value);
-      setFeedback(prev => ({
-        ...prev,
-        priceValid: numberValue > 0 && numberValue <= 10000000
-      }));
-    }
-
-    if (name === 'category') {
-      const numberCategory = Number(value)
-      setFeedback(prev => ({
-        ...prev,
-        categoryValid : numberCategory > 0 && numberCategory <= 4
-      }))
-    }
-
-    if (name === 'place') {
-      const numberPlace = Number(value)
-      setFeedback(prev => ({
-        ...prev,
-        placeValid : numberPlace > 0
-      }))
-    }
-  };
-
-  // 폼 작성 진행률을 계산하는 함수입니다
-  const calculateProgress = () => {
-    let progress = 0;
-    if (formData.title) progress += 33;
-    if (formData.price) progress += 33;
-    if (formData.description) progress += 34;
-    return progress;
-  };
-
-  const onSubmit = async (e) => {
-    e.preventDefault()
-    if(!feedback.priceValid || !feedback.titleValid || selectedFiles.length === 0){
-      // 조건 불만족 알림 보내기
-      alert('제출 내용을 확인해 주세요.')
-    }    
-
-    const formData = new FormData()
-    formData.append('title', formData.title)
-    formData.append('price', formData.price)
-    formData.append('description', formData.description)
-    formData.append('category', formData.category)
-    formData.append('place', formData.place)
-    selectedFiles.forEach((file) => {
-        formData.append('images', file); // 키는 추후 수정 가능
-    });
-
-    try{
-      const response = await axios.post('POST-URL-HERE', formData)
-      redirect(response.data.productURL) // 작성된 페이지로 이동시키기
-    } catch(err) {
-      alert('제출에 문제가 발생했습니다.')
-      console.log(err)
-    }
-  }
-
-  const selectItems = [
+  const categories = [
     {value : '0', text : '선택'},
     {value : '1', text : '전자기기'},
     {value : '2', text : '가구'},
@@ -169,12 +79,12 @@ export default function ProductForm() {
             카테고리
           </label>
           <DropDownSelector
-          name='category'
-          value={formData.category}
+          name='categoryId'
+          value={formData.categoryId}
           onChange={handleChange}
           className="mt-1 block w-full px-3 py-2 border border-green-300 rounded-md shadow-sm 
           focus:outline-none focus:ring-2 focus:ring-green-500"
-          options={selectItems}
+          options={categories}
           />
         </div>
 
@@ -227,8 +137,8 @@ export default function ProductForm() {
               거래장소
           </label>
           <WritePlace 
-          name='place'
-          placeIndex={formData.place} 
+          name='locationId'
+          placeIndex={formData.locationId} 
           onChange={handleChange}/>
         </div>
         

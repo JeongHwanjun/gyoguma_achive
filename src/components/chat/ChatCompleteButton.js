@@ -1,7 +1,7 @@
 
 const ChatCompleteButton = ({ Complete, setComplete }) => {
   return (
-    <div className="p-4 bg-orange-100 border-t border-orange-300 flex justify-end">
+    <div className="w-full p-4 bg-orange-100 border-t border-orange-300 flex justify-end rounded-b-lg">
       <button
         onClick={setComplete}
         disabled={Complete}
