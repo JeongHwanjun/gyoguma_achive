@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchProductById, clearCurrentProduct } from "../redux/slices/productSlice";
+import axiosInstance from "../api/axiosInstance";
 
 const categories = {
   1: "전공서적",
@@ -26,17 +27,22 @@ function ProductDetailPage() {
   const { productId } = useParams();
   const dispatch = useDispatch();
   const [selectedImage, setSelectedImage] = useState(0);
+  const navigate = useNavigate();
 
   const currentProduct = useSelector(state => state.product.currentProduct);
   const loading = useSelector(state => state.product.loading);
   const error = useSelector(state => state.product.error);
+  const { userId } = useSelector(state => state.auth)
 
   useEffect(() => {
+    // ID가 유효한지 확인
     if (!productId) {
       console.error("Invalid product ID");
       return;
     }
     dispatch(fetchProductById(productId));
+
+    // Cleanup function
     return () => {
       dispatch(clearCurrentProduct());
     };
@@ -45,6 +51,49 @@ function ProductDetailPage() {
   const handleImageClick = (index) => {
     setSelectedImage(index);
   };
+  
+  const createOrGetChatRoom = async () => {
+    const buyerId = userId // 상품을 보는 사용자가 구매자임
+    try{
+      const existRoomResponse = await axiosInstance.get(`/chat/buyer/${buyerId}`)
+      const existRooms = existRoomResponse.data
+      const existingRoom = existRooms?.find(
+        (room) =>
+          room.buyer === buyerId && room.product === productId
+      );
+      //채팅방이 이미 있는가?
+      if(existingRoom) {
+        //채탕방이 있다면 그 채팅방으로 이동
+        return existingRoom.roomId
+      } 
+      // 채팅방이 없다면 새로 생성
+      // /members/products/{productId} 를 통해 sellerId를 받아올 수 있음.
+      const sellerIdResponse = await axiosInstance.get(`/members/products/${productId}`)
+      const sellerId = sellerIdResponse.data.userId
+      // 받아온 데이터를 기반으로 신규 채팅방 생성
+      const createRoomResponse = await axiosInstance.post("/chat", {
+        buyer: buyerId,
+        seller: sellerId,
+        product: productId,
+        senderId: buyerId,
+      });
+
+      // 새로 생성된 roomId 반환
+      return createRoomResponse.data.roomId; 
+    } catch (error) {
+      console.error("Error while creating or fetching chat room:", error);
+      throw error;
+    }
+  }
+
+  const moveToChat = async () => {
+    try {
+      const roomId = await createOrGetChatRoom()
+      navigate(`/chat/transaction:${roomId}`)
+    } catch(e) {
+      console.error('채팅방 이동 실패 : ', error)
+    }
+  }
 
   if (loading) {
     return <div className="flex justify-center items-center h-screen">로딩중...</div>;
@@ -100,15 +149,15 @@ function ProductDetailPage() {
               <div className="flex items-center space-x-3 text-lg">
                 <span className="font-medium">카테고리:</span>
                 <span className="px-3 py-1.5 bg-gray-100 rounded-full">
-              {categories[currentProduct.categoryId] || "미분류"}
-            </span>
+                  {categories[currentProduct.categoryId] || "미분류"}
+                </span>
               </div>
-
+              
               <div className="flex items-center space-x-3 text-lg">
                 <span className="font-medium">거래장소:</span>
                 <span className="px-3 py-1.5 bg-gray-100 rounded-full">
-              {locations[currentProduct.locationId] || "위치 정보 없음"}
-            </span>
+                  {locations[currentProduct.locationId] || "위치 정보 없음"}
+                </span>
               </div>
 
               <p className="text-lg">{`등록일: ${new Date(currentProduct.createdAt).toLocaleDateString()}`}</p>
@@ -117,7 +166,8 @@ function ProductDetailPage() {
 
           {/* 채팅하기 버튼 */}
           <button
-            className="w-full py-4 text-lg bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+            className="w-full py-4 text-lg bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            onClick={moveToChat}>
             채팅하기
           </button>
         </div>

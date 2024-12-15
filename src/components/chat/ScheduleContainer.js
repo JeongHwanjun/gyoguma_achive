@@ -1,14 +1,10 @@
 import SchedulePicker from "./SchedulePicker";
-import { API } from '../../api/index';
-import axios from 'axios';
+import axiosInstance from "../../api/axiosInstance";
 import React, { useCallback, useEffect, useState } from "react";
 
 const ScheduleContainer = ({roomId}) => {
     const [selectedTimes, setSelectedTimes] = useState({});
-    const [availableTimes, setAvailableTimes] = useState({
-    "2024-12-11": [10, 11],
-    "2024-12-12": [15, 16],
-    });
+    const [availableTimes, setAvailableTimes] = useState({});
 
     // 금일로부터 7일, 09시~21시
     const today = new Date();
@@ -23,7 +19,7 @@ const ScheduleContainer = ({roomId}) => {
     useEffect(() => {
         const fetchAvailableTime = async () => {
             try{
-                const response = await axios.get(`/chat/schedule/${roomId}`)
+                const response = await axiosInstance.get(`/chat/schedule/${roomId}`)
                 setAvailableTimes(response.data.results.availableTimes)
             } catch (e) {
                 console.error('fetch failed : ',e)
@@ -36,7 +32,7 @@ const ScheduleContainer = ({roomId}) => {
         console.log("Selected times submitted: ", selectedTimes);
         // Example POST request
         try{
-            const response = await axios.post(`/chat/schedule/${roomId}`, selectedTimes)
+            const response = await axiosInstance.post(`/chat/schedule/${roomId}`, selectedTimes)
             setAvailableTimes(response.data.results.availableTimes)
         } catch (e) {
             console.error("submit failed : ",e)

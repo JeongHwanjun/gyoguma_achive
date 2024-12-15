@@ -2,11 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API } from '../api/index';
 import axiosInstance from '../api/axiosInstance';
-import ProductForm from '../components/Write/ProductForm';
+import ProductForm from '../components/Write/ProductForm'
 import { useSelector } from 'react-redux';
 
 const WritePage = () => {
+  const {userId, isAuthenticated} = useSelector((state) => state.auth)
+  // 상품 정보를 제어하는 state
   const [formData, setFormData] = useState({
+    memberId: userId,
     title: '',
     price: '',
     description: '',
@@ -16,10 +19,6 @@ const WritePage = () => {
 
   const [selectedFiles, setSelectedFiles] = useState([]);
   const navigate = useNavigate();
-
-  // Redux에서 현재 로그인된 사용자 정보 가져오기
-  const { isAuthenticated, userEmail, memberId } = useSelector((state) => state.auth);
-  console.log('useSelector memberId:', memberId); // 추가
 
   const [feedback, setFeedback] = useState({
     titleLength: 0,
@@ -31,16 +30,16 @@ const WritePage = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      console.log('Auth state changed:' , { isAuthenticated, userEmail, memberId });
+      console.log('Auth state changed:' , { isAuthenticated, userEmail, userId });
       alert('로그인이 필요한 서비스입니다.');
       navigate('/');
     }
-  }, [isAuthenticated,  userEmail, memberId, navigate]);
+  }, [isAuthenticated,  userEmail, userId, navigate]);
 
 
-  useEffect(() => {
-    console.log('Auth state changed:', { isAuthenticated, userEmail, memberId });
-  }, [isAuthenticated, userEmail, memberId]);
+  useEffect(() => 
+    console.log('Auth state changed:', { isAuthenticated, userEmail, userId });
+  }, [isAuthenticated, userEmail, userId]);
   
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -116,13 +115,13 @@ const WritePage = () => {
         description: formData.description,
         categoryId: Number(formData.categoryId),
         locationId: Number(formData.locationId),
-        memberId: memberId // memberId를 숫자로 변환
+        memberId: userId // userId를 숫자로 변환
       };
       const response = await axiosInstance.post('/products/', productData);
 
       console.log('상품 등록 데이터:', productData);
       console.log('상품 등록 응답:', response);
-      console.log('memberId:', memberId);
+      console.log('memberId:', userId);
       return response.data.result.productId;
     } catch (error) {
       console.error('상품 등록 에러:', error.response?.data || error);

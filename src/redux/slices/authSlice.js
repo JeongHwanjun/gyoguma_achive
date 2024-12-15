@@ -57,9 +57,34 @@ export const login = createAsyncThunk(
 
 const authSlice = createSlice({
   name: 'auth',
-  initialState,
+  initialState: {
+    userId : null,
+    userEmail : null,
+    userNickName : null,
+    userRating : null,
+    accessToken: null,
+    refreshToken : null,
+    isAuthenticated: false,
+    loading: false,
+    error: null,
+  },
   reducers: {
+    loginSuccess(state, action) {
+      state.userId = action.payload.userId;
+      state.userEmail = action.payload.userEmail;
+      state.userNickName = action.payload.userNickName;
+      state.userRating = action.payload.userRating;
+      state.accessToken = action.payload.accessToken;
+      state.refreshToken = action.payload.refreshToken;
+      state.isAuthenticated = true;
+    },
     logout: (state) => {
+      state.userId = null;
+      state.userEmail = null;
+      state.userNickName = null;
+      state.userRating = null;
+      state.accessToken = null;
+      state.refreshToken = null;
       state.isAuthenticated = false;
       state.userEmail = null;
       state.memberId = null;

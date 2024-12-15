@@ -1,19 +1,22 @@
 
 // HomePage.js 또는 ProductListPage.js
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import ProductCard from '../components/category/ProductCard';
 import {
   setCurrentCategory,
   fetchProductsByCategory,
-  setPage
+  setPage,
+  setSortDirection,
+  setSortCriteria
 } from '../redux/slices/productSlice';
 
 const HomePage = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const observer = useRef();
+  const [sortDir, setSortDir] = useState(true)
+  const [sortCri, setSortCri] = useState('date')
   const {
     categoryProducts,
     currentCategory,
@@ -55,10 +58,13 @@ const HomePage = () => {
     dispatch(fetchProductsByCategory({ categoryId, page: 1 }));
   };
 
-  const handleSort = (sortOrder) => {
-    // 정렬 로직 구현 필요
-    console.log('Sort order:', sortOrder);
-  };
+  useEffect(() => {
+    const strSortDirection = sortDir ? 'desc' : 'asc'
+    
+    dispatch(setSortDirection(strSortDirection))
+    dispatch(setSortCriteria(sortCri))
+    dispatch(fetchProductsByCategory({ categoryId : currentCategory, page: 1 }));
+  },[currentCategory, dispatch, sortCri, sortDir])
 
   useEffect(() => {
     dispatch(fetchProductsByCategory({ categoryId: currentCategory, page: 1 }));
@@ -90,16 +96,30 @@ const HomePage = () => {
               </button>
             ))}
           </div>
-          <select
-            onChange={(e) => handleSort(e.target.value)}
-            className="px-4 py-2 border rounded-md"
-          >
-            <option value="latest">최신순</option>
-            <option value="price_asc">가격 낮은순</option>
-            <option value="price_desc">가격 높은순</option>
-          </select>
+          <div className="relative">
+            {/* Select와 Button 통합 */}
+            <select
+              onChange={(e) => setSortCri(e.target.value)}
+              className="appearance-none cursor-pointer px-4 py-2 pr-10 border rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 focus:outline-none"
+              value={sortCri}
+            >
+              <option value="date">날짜순</option>
+              <option value="price">가격순</option>
+            </select>
+
+            {/* 화살표 버튼 */}
+            <button
+              onClick={() => setSortDir((prev) => !prev)}
+              className="absolute inset-y-0 right-0 flex items-center px-2 focus:outline-none"
+            >
+              <img
+                src="/images/arrow.png"
+                alt="direction"
+                className={`w-5 h-5 transition-transform ${sortDir ? 'rotate-90' : '-rotate-90'}`}
+              />
+            </button>
+          </div>
         </div>
-        
       </div>
 
       {/* 상품 목록 */}

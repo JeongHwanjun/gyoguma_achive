@@ -23,14 +23,21 @@ function AuthButton() {
       // URL 파라미터 제거
       window.history.replaceState({}, document.title, window.location.pathname);
 
-      // 토큰을 받아온 후, 해당 토큰을 인증에 사용해 현재 유저 이메일을 받아옴
+      // 토큰을 받아온 후, 해당 토큰을 인증에 사용해 사용자 정보 받아옴
       const getUserEmail = async () => {
         try {
-          const response = await axiosInstance.get('/token/users');
-          const memberId = response.data.userId;
-          console.log('User ID:', memberId);
+          const responseID = await axiosInstance.get('/token/users');
+          const userId = responseID.data.userId
+          const responseALL = await axiosInstance.get(`/members/${userId}`)
+          const responseEmail = await axiosInstance.get('/members/byToken');
+
+          const userEmail = responseEmail.data.email
+          const userNickName = responseALL.data.result.nickname
+          const userRating = responseALL.data.result.rating
+          console.log('User Email:', userEmail)
+          console.log('User ID : ',userId)
           // dispatch로 전역에서 이용할 수 있도록 redux state 갱신
-          dispatch(loginSuccess({ memberId, accessToken, refreshToken }))
+          dispatch(loginSuccess({userEmail, userId, userNickName, userRating, accessToken, refreshToken}))
           // 이후 원하는 컴포넌트에서 useSelector로 언제든 로그인 정보 이용 가능
         } catch (error) {
           console.error('Failed to fetch user email:', error);

@@ -38,7 +38,7 @@ function App() {
           <Route path="/product/:productId" element={<ProductDetailPage />} />
 
           {/* 채팅 관련 라우트들을 계층적으로 구성 */}
-          <Route path="/chat/user/:userId" element={<ChatMainPage />} />
+          <Route path="/chat/user" element={<ChatMainPage />} />
           <Route path="/chat/:roomId" element={<ChatPage />} />
           {/* 마이페이지 */}
           <Route path="/mypage" element={<MyPage />} />
