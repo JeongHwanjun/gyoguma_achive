@@ -1,4 +1,3 @@
-// src/components/Write/ProductForm.js
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API } from '../api/index';
@@ -18,34 +17,34 @@ const WritePage = () => {
     locationId: 0,
   });
 
-  // 이미지 정보를 제어하는 state
-  const [selectedFiles, setSelectedFiles] = useState([])
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const navigate = useNavigate();
 
-  // 사용자 정보
-  
-  console.log(isAuthenticated)
-  useEffect(() => {
-    if(!isAuthenticated){
-      alert('로그인이 필요한 서비스입니다.')
-      navigate('/')
-    }
-  })
-
-  // 피드백 정보를 관리하는 상태입니다
   const [feedback, setFeedback] = useState({
     titleLength: 0,
     titleValid: false,
     priceValid: false,
-    categoryValid : false,
-    placeValid : false,
+    categoryValid: false,
+    placeValid: false,
   });
 
-  const navigate=useNavigate()
+  useEffect(() => {
+    if (!isAuthenticated) {
+      console.log('Auth state changed:' , { isAuthenticated, userEmail, userId });
+      alert('로그인이 필요한 서비스입니다.');
+      navigate('/');
+    }
+  }, [isAuthenticated,  userEmail, userId, navigate]);
 
-  // 입력 필드 값이 변경될 때 호출되는 함수입니다
+
+  useEffect(() => 
+    console.log('Auth state changed:', { isAuthenticated, userEmail, userId });
+  }, [isAuthenticated, userEmail, userId]);
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === 'title' || name === 'description'){
+
+    if (name === 'title' || name === 'description') {
       setFormData(prev => ({
         ...prev,
         [name]: value
@@ -54,11 +53,10 @@ const WritePage = () => {
       setFormData(prev => ({
         ...prev,
         [name]: Number(value)
-      }))
+      }));
     }
-    
 
-    // 실시간 유효성 검사를 수행합니다
+    // 유효성 검사 로직
     if (name === 'title') {
       setFeedback(prev => ({
         ...prev,
@@ -66,7 +64,6 @@ const WritePage = () => {
         titleValid: value.length >= 5 && value.length <= 100
       }));
     }
-
     if (name === 'price') {
       const numberValue = Number(value);
       setFeedback(prev => ({
@@ -74,25 +71,22 @@ const WritePage = () => {
         priceValid: numberValue > 0 && numberValue <= 10000000
       }));
     }
-
     if (name === 'categoryId') {
-      const numberCategory = Number(value)
+      const numberCategory = Number(value);
       setFeedback(prev => ({
         ...prev,
-        categoryValid : numberCategory > 0 && numberCategory <= 4
-      }))
+        categoryValid: numberCategory >= 1 && numberCategory <= 8
+      }));
     }
-
     if (name === 'locationId') {
-      const numberPlace = Number(value)
+      const numberPlace = Number(value);
       setFeedback(prev => ({
         ...prev,
-        placeValid : numberPlace > 0
-      }))
+        placeValid: numberPlace > 0
+      }));
     }
   };
 
-  // 폼 작성 진행률을 계산하는 함수입니다
   const calculateProgress = () => {
     let progress = 0;
     if (feedback.titleValid) progress += 20;
@@ -102,57 +96,98 @@ const WritePage = () => {
     if (selectedFiles.length > 0) progress += 20;
     return progress;
   };
+  const createProduct = async () => {
+    try {
+      if (!isAuthenticated) {
+        throw new Error('로그인이 필요합니다.');
+      }
 
-  const onSubmit = async (e) => {
-    e.preventDefault()
-    if(!feedback.priceValid || !feedback.titleValid || !feedback.categoryValid || !feedback.placeValid || selectedFiles.length === 0){
-      // 조건 불만족 알림 보내기
-      alert('제출 내용을 확인해 주세요.')
-    }    
+      if (!formData.title || !formData.price || !formData.description || !formData.categoryId || !formData.locationId) {
+        throw new Error('모든 필드를 입력해주세요.');
+      }
 
-    
-    const imageData = new FormData()
-    selectedFiles.forEach((file) => {
-      imageData.append('images', file); // 키가 'images'여야 정상적으로 받을 수 있음
-    });
-    
-    try{
-      setFormData((prev) => ({
-        ...prev,
-        memberId : userId
-      }))
-      console.log('Sending Data : ', formData)
-      // 글 등록
-      const response = await API.product.create(formData)
-      const productId = response.data.result.productId
-      // 이미지 등록
-      /*
-      const imageResponse = await axiosInstance.post(
+      console.log('memberId:', memberId);
+
+      // 서버가 기대하는 정확한 데이터 형식으로 변환
+      const productData = {
+        title: formData.title,
+        price: Number(formData.price),
+        description: formData.description,
+        categoryId: Number(formData.categoryId),
+        locationId: Number(formData.locationId),
+        memberId: userId // userId를 숫자로 변환
+      };
+      const response = await axiosInstance.post('/products/', productData);
+
+      console.log('상품 등록 데이터:', productData);
+      console.log('상품 등록 응답:', response);
+      console.log('memberId:', userId);
+      return response.data.result.productId;
+    } catch (error) {
+      console.error('상품 등록 에러:', error.response?.data || error);
+      throw new Error(error.response?.data?.message || '상품 등록에 실패했습니다.');
+    }
+  };
+  const uploadImages = async (productId) => {
+    try {
+      const imageData = new FormData();
+
+      selectedFiles.forEach((file) => {
+        imageData.append('images', file);
+        imageData.append('originFileName', file.name);
+        imageData.append('size', file.size);
+      });
+
+      const response = await axiosInstance.post(
         `/products/${productId}/images`,
         imageData,
         {
-          headers : {
+          headers: {
             'Content-Type': 'multipart/form-data'
-          }
+          },
+          timeout: 30000
         }
-      )
-      console.log('이미지 업로드 성공 : ', imageResponse)
-      */
-      // 작성된 페이지로 이동시키기
-      navigate(`/product/${productId}`)
-    } catch(err) {
-      alert('제출에 문제가 발생했습니다.')
-      console.log(err)
+      );
+
+      console.log('이미지 업로드 성공:', response);
+      return response;
+    } catch (error) {
+      console.error('이미지 업로드 에러:', error.response?.data || error);
+      throw new Error('이미지 업로드에 실패했습니다.');
     }
-  }
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!feedback.priceValid || !feedback.titleValid ||
+      !feedback.categoryValid || !feedback.placeValid ||
+      selectedFiles.length === 0) {
+      alert('제출 내용을 확인해 주세요.');
+      return;
+    }
+
+    try {
+      const productId = await createProduct();
+
+      if (productId) {
+        await uploadImages(productId);
+        navigate(`/product/${productId}`);
+      }
+    } catch (error) {
+      alert(error.message);
+      console.error('전체 제출 에러:', error);
+    }
+  };
+
   return (
-    <ProductForm 
-    calculateProgress={calculateProgress}
-    onSubmit={onSubmit}
-    setSelectedFiles={setSelectedFiles}
-    handleChange={handleChange}
-    formData={formData}
-    feedback={feedback}
+    <ProductForm
+      calculateProgress={calculateProgress}
+      onSubmit={onSubmit}
+      setSelectedFiles={setSelectedFiles}
+      handleChange={handleChange}
+      formData={formData}
+      feedback={feedback}
     />
   );
 };

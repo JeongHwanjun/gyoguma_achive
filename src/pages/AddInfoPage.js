@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
+import axios from "axios";
 
 const AddInfoPage = () => {
   const [userInfo, setUserInfo] = useState({
@@ -36,7 +37,15 @@ const AddInfoPage = () => {
     setError(null);
 
     try {
-      await axiosInstance.post('/users/addInfo', userInfo);
+      //await axiosInstance.post('/users/addInfo', userInfo);
+      const response = await axios.post('http://localhost:8080/users/addInfo',userInfo ,{
+        headers : {
+          'Authorization' : `Bearer ${localStorage.getItem('access_token')}`,
+          'Content-Type' : 'application/json'
+        },
+        withCredentials : 'include'
+      })
+      console.log(response)
       navigate('/');
     } catch (error) {
       setError(error.response?.data?.message || '정보 업데이트 중 오류가 발생했습니다.');
@@ -54,7 +63,7 @@ const AddInfoPage = () => {
 
   // 학번 유효성 검사
   const validateStudentNumber = (value) => {
-    return /^\d{10}$/.test(value); // 10자리 숫자
+    return /^\d{9}$/.test(value); // 9자리 숫자
   };
 
   // 전화번호 유효성 검사
@@ -106,12 +115,12 @@ const AddInfoPage = () => {
                 value={userInfo.studentNumber}
                 onChange={handleChange}
                 required
-                pattern="\d{10}"
-                title="학번은 10자리 숫자여야 합니다"
+                pattern="\d{9}"
+                title="학번은 9자리 숫자여야 합니다"
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               />
               <p className="mt-1 text-xs text-gray-500">
-                10자리 숫자로 입력해주세요
+                9자리 숫자로 입력해주세요
               </p>
             </div>
 

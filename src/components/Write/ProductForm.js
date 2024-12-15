@@ -19,12 +19,16 @@ export default function ProductForm({
   
 
   const categories = [
-    {value : '0', text : '선택'},
-    {value : '1', text : '전자기기'},
-    {value : '2', text : '가구'},
-    {value : '3', text : '도서'},
-    {value : '4', text : '의류'}
+    { id: 1, name: '전공서적' },
+    { id: 2, name: '운동용품' },
+    { id: 3, name: '의약품' },
+    { id: 4, name: '생필품' },
+    { id: 5, name: '전자기기' },
+    { id: 6, name: '의류/신발/악세사리' },
+    { id: 7, name: '심부름' },
+    { id: 8, name: '기타' }
   ]
+
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
@@ -72,20 +76,30 @@ export default function ProductForm({
             </p>
           )}
         </div>
-
         {/* 카테고리 선택 필드 */}
         <div>
           <label className="block text-sm font-medium text-green-800">
             카테고리
           </label>
-          <DropDownSelector
-          name='categoryId'
-          value={formData.categoryId}
-          onChange={handleChange}
-          className="mt-1 block w-full px-3 py-2 border border-green-300 rounded-md shadow-sm 
-          focus:outline-none focus:ring-2 focus:ring-green-500"
-          options={categories}
-          />
+          <select
+            name="categoryId"
+            value={formData.categoryId}
+            onChange={handleChange}
+            className="mt-1 block w-full px-3 py-2 border border-green-300 rounded-md shadow-sm
+    focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            <option value={0}>카테고리를 선택해주세요</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+          {!feedback.categoryValid && (
+            <p className="mt-1 text-sm text-red-500">
+              카테고리를 선택해주세요
+            </p>
+          )}
         </div>
 
         {/* 가격 입력 필드 */}

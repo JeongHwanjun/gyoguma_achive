@@ -2,18 +2,16 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const ProductCard = ({ product }) => {
-  // product 객체에서 필요한 정보들을 구조분해할당
   const {
     productId,
     title,
     price,
-    imageUrl,
+    images, // 이미지 배열로 수정
     status,
     nickname,
     createdAt
   } = product;
 
-  // 간단한 날짜 포맷팅 함수
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -35,16 +33,18 @@ const ProductCard = ({ product }) => {
     'SOLD_OUT': '판매완료'
   };
 
-  // 기본 이미지 URL
+  // SVG 기본 이미지를 base64로 인코딩
   const defaultImageUrl = 'data:image/svg+xml;charset=UTF-8,%3csvg width="200" height="200" xmlns="http://www.w3.org/2000/svg"%3e%3crect width="200" height="200" fill="%23CCCCCC"/%3e%3ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23666666"%3e이미지 없음%3c/text%3e%3c/svg%3e';
 
+  // 첫 번째 이미지의 썸네일 URL 또는 기본 이미지 사용
+  const thumbnailUrl = images?.[0]?.storedFileName || defaultImageUrl;
+
   return (
-    // 상품 상세 페이지로 이동하는 링크
     <Link to={`/product/${productId}`} className="block">
       <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
         <div className="relative aspect-square">
           <img
-            src={imageUrl || defaultImageUrl}
+            src={thumbnailUrl}
             alt={title}
             className="w-full h-full object-cover rounded-t-lg"
             onError={(e) => {
@@ -58,8 +58,13 @@ const ProductCard = ({ product }) => {
               {statusLabel[status] || status}
             </div>
           )}
+          {/* 여러 이미지가 있는 경우 표시 */}
+          {images && images.length > 1 && (
+            <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white px-2 py-1 rounded-full text-xs">
+              +{images.length - 1}
+            </div>
+          )}
         </div>
-        {/*상품 정보 영역 */}
         <div className="p-4">
           <h3 className="font-medium text-gray-900 mb-1 truncate">
             {title || '제목 없음'}

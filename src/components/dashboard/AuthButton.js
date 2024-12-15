@@ -1,4 +1,3 @@
-// src/components/dashboard/AuthButton.js
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
@@ -63,20 +62,12 @@ function AuthButton() {
 
   return (
     <div className="flex items-center gap-4">
-        <>
-          <button
-            onClick={handleLogin}
-            className="text-gyoguma-dark hover:text-gyoguma"
-          >
-            로그인
-          </button>
-          <Link
-            to="/register"
-            className="px-4 py-2 bg-gyoguma text-white rounded-lg hover:bg-gyoguma-dark"
-          >
-            회원가입
-          </Link>
-        </>
+      <button
+        onClick={handleLogin}
+        className="text-gyoguma-dark hover:text-gyoguma"
+      >
+        로그인
+      </button>
     </div>
   );
 }

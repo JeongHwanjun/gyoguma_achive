@@ -7,14 +7,15 @@ import { logout } from "../../redux/slices/authSlice";
 import UserProfile from "./UserProfile";
 import AuthButton from "./AuthButton";
 import ChatButton from "./ChatButton";
-import { useCallback } from "react";
+import React, { useEffect, useCallback } from "react";
+
 
 function Dashboard() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, userNickName, userId } = useSelector(state => state.auth);
-
   const handleLogout = useCallback(async () => {
+    
     try {
       // 서버에 로그아웃 요청
       await axiosInstance.post('/logout');
