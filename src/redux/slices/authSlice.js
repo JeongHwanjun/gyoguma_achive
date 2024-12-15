@@ -104,6 +104,7 @@ const authSlice = createSlice({
   initialState: {
     userId : null,
     userEmail : null,
+    userName : null,
     userNickName : null,
     userRating : null,
     accessToken: null,
@@ -116,6 +117,7 @@ const authSlice = createSlice({
     loginSuccess(state, action) {
       state.userId = action.payload.userId;
       state.userEmail = action.payload.userEmail;
+      state.userName = action.payload.userName;
       state.userNickName = action.payload.userNickName;
       state.userRating = action.payload.userRating;
       state.accessToken = action.payload.accessToken;
@@ -125,6 +127,7 @@ const authSlice = createSlice({
     logout: (state) => {
       state.userId = null;
       state.userEmail = null;
+      state.userName = null;
       state.userNickName = null;
       state.userRating = null;
       state.accessToken = null;

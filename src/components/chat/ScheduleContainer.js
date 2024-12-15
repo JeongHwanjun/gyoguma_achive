@@ -44,11 +44,14 @@ const ScheduleContainer = ({roomId, selectedTimes, setSelectedTimes}) => {
     const handleSubmit = useCallback(async () => {
         console.log("Selected times submitted: ", selectedTimes);
         try{
-            const response = await axiosInstance.post(`/schedule/${roomId}`,{
+            const responseDelete = await axiosInstance.delete(`/schedule/${roomId}/${userId}`)
+            console.log('responseDelete : ', responseDelete)
+            const responsePost = await axiosInstance.post(`/schedule/${roomId}`,{
                 roomId : roomId,
                 senderId : userId,
                 time : selectedTimes
             })
+            console.log('responsePost : ',responsePost)
             await fetchAvailableTime()
         } catch (e) {
             console.error("submit failed : ",e)

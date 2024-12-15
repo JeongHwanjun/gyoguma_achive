@@ -22,6 +22,7 @@ const ChatRoomCard = ({ room }) => {
 
     fetchOtherUser()
   },[otherUserId])
+  
   return (
     <Link
       to={`/chat/${room.roomId}`}

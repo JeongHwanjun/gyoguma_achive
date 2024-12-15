@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import axiosInstance from '../../api/axiosInstance';
 
 const ProductCard = ({ product }) => {
   const {
@@ -8,6 +9,7 @@ const ProductCard = ({ product }) => {
     price,
     images, // 이미지 배열로 수정
     status,
+    name,
     nickname,
     createdAt
   } = product;
@@ -38,7 +40,7 @@ const ProductCard = ({ product }) => {
 
   // 첫 번째 이미지의 썸네일 URL 또는 기본 이미지 사용
   const thumbnailUrl = images?.[0]?.storedFileName || defaultImageUrl;
-
+  
   return (
     <Link to={`/product/${productId}`} className="block">
       <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
@@ -73,7 +75,7 @@ const ProductCard = ({ product }) => {
             {typeof price === 'number' ? `${price.toLocaleString()}원` : '가격 정보 없음'}
           </p>
           <div className="flex justify-between items-center text-sm text-gray-500">
-            <span>{nickname || '판매자 정보 없음'}</span>
+            <span>{name || '판매자 정보 없음'}</span>
             <span>{createdAt ? formatDate(createdAt) : ''}</span>
           </div>
         </div>

@@ -92,12 +92,30 @@ const SchedulePicker = ({
           </React.Fragment>
         ))}
       </div>
-      <button
-        className="mt-4 px-4 py-2 bg-green-500 text-white rounded"
-        onClick={handleSubmit}
-      >
-        제출하기
-      </button>
+      <div className="flex items-center mt-4">
+        <button
+          className="px-4 py-2 bg-green-500 text-white rounded"
+          onClick={handleSubmit}
+        >
+          제출하기
+        </button>
+        <button
+          className="px-4 py-2 ml-4 bg-sky-400 text-white rounded"
+          onClick={handleSubmit}
+        >
+          갱신하기
+        </button>
+        <div className="flex ml-8">
+          <span className="mr-4 flex items-center">
+            <div className="w-4 h-4 bg-green-500 mr-1"></div>
+            <span>두 분 모두 가능한 시간</span>
+          </span>
+          <span className="mr-4 flex items-center">
+            <div className="w-4 h-4 bg-blue-500 mr-1"></div>
+            <span>사용자분만 가능한 시간</span>
+          </span>
+        </div>
+      </div>
     </div>
   );
 };

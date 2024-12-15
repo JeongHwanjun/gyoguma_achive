@@ -24,6 +24,7 @@ function ChatPage() {
   const [currentRoom, setCurrentRoom] = useState({})
   const [product, setProduct] = useState({})
   const [selectedTimes, setSelectedTimes] = useState({});
+  const [isBuyer, setIsBuyer] = useState(false)
   const {roomId} = useParams()
   const navigate = useNavigate()
   const {userId, userNickName, isAuthenticated} = useSelector((state) => state.auth)
