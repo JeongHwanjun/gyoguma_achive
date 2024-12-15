@@ -129,6 +129,7 @@ const ProductDetail = (props) => {
           {description}
         </div>
       </div>
+    </div>
   );
 };
 

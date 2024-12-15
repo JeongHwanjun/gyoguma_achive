@@ -152,7 +152,6 @@ function ChatPage() {
             </button>
           </div>
           <ChatCompleteButton Complete={complete} setComplete={setComplete} />
-          <button onClick={handleLeaveChatRoom}>채팅방 나가기</button>
         </div>
       </div>
       <div className={`transition-all duration-300 ease-in-out transform

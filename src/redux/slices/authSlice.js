@@ -91,12 +91,6 @@ const authSlice = createSlice({
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
     },
-    loginSuccess: (state, action) => {
-      state.isAuthenticated = true;
-      state.userEmail = action.payload.userEmail;
-      state.memberId = action.payload.memberId;
-      state.error = null;
-    },
     setError: (state, action) => {
       state.error = action.payload;
     }

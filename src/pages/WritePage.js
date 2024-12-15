@@ -30,16 +30,16 @@ const WritePage = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      console.log('Auth state changed:' , { isAuthenticated, userEmail, userId });
+      console.log('Auth state changed:' , { isAuthenticated, userId });
       alert('로그인이 필요한 서비스입니다.');
       navigate('/');
     }
-  }, [isAuthenticated,  userEmail, userId, navigate]);
+  }, [isAuthenticated, userId, navigate]);
 
 
   useEffect(() => 
-    console.log('Auth state changed:', { isAuthenticated, userEmail, userId });
-  }, [isAuthenticated, userEmail, userId]);
+    console.log('Auth state changed:', { isAuthenticated, userId })
+  , [isAuthenticated, userId]);
   
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -106,7 +106,7 @@ const WritePage = () => {
         throw new Error('모든 필드를 입력해주세요.');
       }
 
-      console.log('memberId:', memberId);
+      console.log('memberId:', userId);
 
       // 서버가 기대하는 정확한 데이터 형식으로 변환
       const productData = {
