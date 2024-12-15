@@ -16,15 +16,15 @@ const MyItems = () => {
         totalElements: 0
     });
 
-    const { user } = useSelector(state => state.auth);
-    const accessToken = localStorage.getItem('accessToken');
+    const {userId} = useSelector(state => state.auth);
+    const accessToken = localStorage.getItem('access_token');
 
     useEffect(() => {
         const fetchMyProducts = async () => {
             try {
                 setLoading(true);
-                console.log('Fetching products for user:', user.id);
-                const response = await API.product.getByMember(user.id, page);
+                console.log('Fetching products for user:', userId);
+                const response = await API.product.getByMember(userId, page);
                 console.log('API response:', response);
                 const data = response.data;
 
@@ -49,10 +49,10 @@ const MyItems = () => {
             }
         };
 
-        if (user?.id && accessToken) {
+        if (userId && accessToken) {
             fetchMyProducts();
         }
-    }, [user?.id, accessToken, page]);
+    }, [userId, accessToken, page]);
 
     const loadMore = () => {
         if (!pageInfo.isLast && !loading) {

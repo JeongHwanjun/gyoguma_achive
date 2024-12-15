@@ -122,22 +122,26 @@ function ChatPage() {
           console.error("Room not found for this roomId.");
           return;
         }
-  
-        setOtherUserId(Number(room.buyer) === userId ? room.seller : room.buyer) // 상대방의 ID 기록
-        const otherUserInfo = await axiosInstance.get(`/members/${otherUserId}`);
+        // 자신이 buyer인지 seller인지 기록 -> complete 여부 판단
         
+        // 상대방의 ID 기록
+        const otherUserId = Number(room.buyer) === userId ? room.seller : room.buyer
+        const otherUserInfo = await axiosInstance.get(`/members/${otherUserId}`);
+        console.log(otherUserInfo)
         const productInfo = await axiosInstance.get(`/products/${room.product}`)
 
+        setIsBuyer(Number(room.buyer) === userId)
+        setOtherUserId(otherUserId)
         setCurrentRoom(room); // 상태 업데이트
         setOtherUser(otherUserInfo.data.result); // 상대방 정보 업데이트
-        setProduct(productInfo.data.result) // 상품 정보 업데이트
+        setProduct(productInfo.data.result.productInfo) // 상품 정보 업데이트
       } catch (e) {
         console.error('Error on Fetching Data : ', e);
       }
     };
   
     fetchInformation();
-  }, [otherUserId, roomId, userId]);
+  }, [roomId, userId]);
 
   const onSubmit = async (rating) => {
     try{
@@ -167,8 +171,8 @@ function ChatPage() {
                 {showSchedule ? "스케줄표 OFF" : "스케줄표 ON"}
             </button>
           </div>
-          {/* 판매자만  */}
-          <ChatCompleteButton Complete={complete} setComplete={setComplete} />
+          {/* 구매자만 상대방을 평가할 수 있음 */}
+          {isBuyer && <ChatCompleteButton Complete={complete} setComplete={setComplete} />}
         </div>
       </div>
       <div className={`transition-all duration-300 ease-in-out transform

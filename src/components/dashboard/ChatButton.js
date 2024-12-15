@@ -42,9 +42,7 @@ function ChatButton() {
   return (
     <Link to={'/chat/user'} className="text-gyoguma-dark hover:text-gyoguma">
       채팅
-      {(
-        <span className="absolute top-6 right-32 w-2 h-2 bg-red-500 rounded-full"></span>
-      )}
+      {hasNewChat && <span className="absolute top-6 right-32 w-2 h-2 bg-red-500 rounded-full"></span>}
     </Link>
   );
 }

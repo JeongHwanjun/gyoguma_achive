@@ -1,6 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import axiosInstance from '../../api/axiosInstance';
+import React from 'react';
 
 const ProductCard = ({ product }) => {
   const {
@@ -10,7 +9,6 @@ const ProductCard = ({ product }) => {
     images, // 이미지 배열로 수정
     status,
     name,
-    nickname,
     createdAt
   } = product;
 

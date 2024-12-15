@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { API } from '../api/index';
 import axiosInstance from '../api/axiosInstance';
 import ProductForm from '../components/Write/ProductForm'
 import { useSelector } from 'react-redux';

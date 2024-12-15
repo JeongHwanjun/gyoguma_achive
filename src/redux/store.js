@@ -4,13 +4,10 @@ import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import authReducer from './slices/authSlice';
 import productReducer from './slices/productSlice';
-import websocketReducer from './slices/websocketSlice'
 import tradeReducer from './slices/tradeSlice';
 import reviewReducer from './slices/reviewSlice';
 import uiReducer from './slices/uiSlice';
-import { createWebSocketMiddleware } from './slices/websocketMiddleware';
 
-const websocketMiddleware = createWebSocketMiddleware('wss://echo.websocket.org');
 
 const persistConfig = {
   key: 'root',
@@ -27,12 +24,11 @@ export const store = configureStore({
     trade: tradeReducer,
     review: reviewReducer,
     ui: uiReducer,
-    websocket: websocketReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false // redux-persist를 위한 설정
-    }).concat(websocketMiddleware)
+    })
 });
 
 export const persistor = persistStore(store);

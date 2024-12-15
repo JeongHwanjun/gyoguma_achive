@@ -114,21 +114,21 @@ function ProductDetailPage() {
                 {/* 제목과 기본 정보 섹션 */}
                 <div className="border-b pb-6 mb-6">
                     <h1 className="text-2xl font-bold text-gray-800 mb-4">
-                        {currentProduct.title}
+                        {currentProduct.productInfo.title}
                     </h1>
                     <div className="flex justify-between items-center">
                         <div className="text-xl font-semibold text-green-600">
                             {new Intl.NumberFormat('ko-KR', {
                                 style: 'currency',
                                 currency: 'KRW'
-                            }).format(currentProduct.price)}
+                            }).format(currentProduct.productInfo.price)}
                         </div>
                         <div className="flex items-center space-x-4">
             <span className="px-3 py-1.5 bg-gray-100 rounded-full text-gray-600">
-              {categories[currentProduct.categoryId] || "미분류"}
+              {categories[currentProduct.productInfo.categoryId] || "미분류"}
             </span>
                             <span className="text-gray-500">
-              {new Date(currentProduct.createdAt).toLocaleDateString()}
+              {new Date(currentProduct.productInfo.createdAt).toLocaleDateString()}
             </span>
                         </div>
                     </div>
@@ -139,15 +139,15 @@ function ProductDetailPage() {
                     <div className="space-y-4">
                         <div className="bg-white rounded-lg shadow-md p-4">
                             <img
-                                src={currentProduct.images?.[selectedImage]?.storedFileName || "https://via.placeholder.com/400x400"}
-                                alt={currentProduct.title}
+                                src={currentProduct.productInfo.images?.[selectedImage]?.storedFileName || "https://via.placeholder.com/400x400"}
+                                alt={currentProduct.productInfo.title}
                                 className="w-full aspect-square object-cover rounded-lg"
                             />
                         </div>
                         {/* 썸네일 이미지들 */}
-                        {currentProduct.images && currentProduct.images.length > 1 && (
+                        {currentProduct.productInfo.images && currentProduct.productInfo.images.length > 1 && (
                             <div className="grid grid-cols-5 gap-2">
-                                {currentProduct.images.map((image, index) => (
+                                {currentProduct.productInfo.images.map((image, index) => (
                                     <button
                                         key={index}
                                         onClick={() => handleImageClick(index)}
@@ -157,7 +157,7 @@ function ProductDetailPage() {
                                     >
                                         <img
                                             src={image.storedFileName || "https://via.placeholder.com/80x80"}
-                                            alt={`${currentProduct.title} ${index + 1}`}
+                                            alt={`${currentProduct.productInfo.title} ${index + 1}`}
                                             className="w-full aspect-square object-cover"
                                         />
                                     </button>
@@ -170,20 +170,20 @@ function ProductDetailPage() {
                     <div className="bg-white rounded-lg shadow-md p-6">
                         <div className="text-gray-600 space-y-4">
                             {/* 판매자 정보 */}
-                            <p className="text-lg pb-2 border-b">{`판매자: ${currentProduct.nickname}`}</p>
+                            <p className="text-lg pb-2 border-b">{`판매자: ${currentProduct.memberInfo.nickname}`}</p>
 
                             {/* 거래 장소 */}
                             <div className="border-b pb-4">
                                 <div className="text-lg mb-2">
                                     <span className="font-medium">거래장소:</span>
                                     <span className="px-3 py-1.5 bg-gray-100 rounded-full ml-2">
-                  {locations[currentProduct.locationId]?.name || "위치 정보 없음"}
+                  {locations[currentProduct.productInfo.locationId]?.name || "위치 정보 없음"}
                 </span>
                                 </div>
                                 <div className="w-full h-[300px] rounded-lg overflow-hidden">
                                     <img
-                                        src={locations[currentProduct.locationId]?.image}
-                                        alt={locations[currentProduct.locationId]?.name}
+                                        src={locations[currentProduct.productInfo.locationId]?.image}
+                                        alt={locations[currentProduct.productInfo.locationId]?.name}
                                         className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
                                         onError={(e) => {
                                             e.target.src = "/images/placeholder.jpg";
@@ -214,7 +214,7 @@ function ProductDetailPage() {
                 </div>
                 <div className="p-8">
                     <div className="min-h-[400px] whitespace-pre-wrap text-gray-700 leading-relaxed">
-                        {currentProduct.description || "상품 설명이 없습니다."}
+                        {currentProduct.productInfo.description || "상품 설명이 없습니다."}
                     </div>
                 </div>
             </div>

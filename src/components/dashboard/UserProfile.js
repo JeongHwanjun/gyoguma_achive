@@ -1,6 +1,7 @@
+import { Link } from "react-router-dom";
 import { User, ChevronDown, Box, History, Store, UserCircle, Star } from "lucide-react";
 
-function UserProfile({userNickName}) {
+function UserProfile({ userNickName }) {
   return (
       <div className="relative group">
         <button className="flex items-center gap-2 hover:text-gyoguma">
@@ -15,22 +16,22 @@ function UserProfile({userNickName}) {
         <div className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
           <div className="absolute inset-0 -top-2 pt-2 group-hover:block">
             <div className="bg-white rounded-lg shadow-xl">
-              <a href="/profile" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100">
+              <Link to="/profile" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100">
                 <UserCircle className="w-4 h-4" />
                 프로필 정보
-              </a>
-              <a href="/my-items" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100">
+              </Link>
+              <Link to="/my-items" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100">
                 <Box className="w-4 h-4" />
                 내 상품
-              </a>
-              <a href="/purchase-history" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100">
+              </Link>
+              <Link to="/purchase-history" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100">
                 <History className="w-4 h-4" />
                 구매 내역
-              </a>
-              <a href="/sales-history" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100">
+              </Link>
+              <Link to="/sales-history" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100">
                 <Store className="w-4 h-4" />
                 판매 내역
-              </a>
+              </Link>
               <div className="px-4 py-2 border-t">
                 <div className="text-sm text-gray-500 flex items-center gap-1">
                   <Star className="w-4 h-4 text-yellow-400" />
