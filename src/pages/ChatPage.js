@@ -6,6 +6,7 @@ import ChatParticipants from '../components/chat/ChatParticipants';
 import ChatProduct from '../components/chat/ChatProduct'
 import ChatCompleteButton from '../components/chat/ChatCompleteButton';
 import ScheduleContainer from '../components/chat/ScheduleContainer';
+import RatingModal from '../components/chat/Rating';
 import { useNavigate, useParams } from 'react-router-dom';
 import { API } from '../api/index';
 import axiosInstance from '../api/axiosInstance';
@@ -18,9 +19,11 @@ function ChatPage() {
   const [complete, setComplete] = useState(false)
   const [showSchedule, setShowSchedule] = useState(false)
   const [stompClient, setStompClient] = useState(null)
-  const [otherUser, setOtherUser] = useState({})
+  const [otherUser, setOtherUser] = useState({}) // nickname, rating만 갖고 있음
+  const [otherUserId, setOtherUserId] = useState(null) // id를 갖고 있음
   const [currentRoom, setCurrentRoom] = useState({})
   const [product, setProduct] = useState({})
+  const [selectedTimes, setSelectedTimes] = useState({});
   const {roomId} = useParams()
   const navigate = useNavigate()
   const {userId, userNickName, isAuthenticated} = useSelector((state) => state.auth)
@@ -119,7 +122,7 @@ function ChatPage() {
           return;
         }
   
-        const otherUserId = Number(room.buyer) === userId ? room.seller : room.buyer;
+        setOtherUserId(Number(room.buyer) === userId ? room.seller : room.buyer) // 상대방의 ID 기록
         const otherUserInfo = await axiosInstance.get(`/members/${otherUserId}`);
         
         const productInfo = await axiosInstance.get(`/products/${room.product}`)
@@ -133,7 +136,17 @@ function ChatPage() {
     };
   
     fetchInformation();
-  }, [roomId, userId]);
+  }, [otherUserId, roomId, userId]);
+
+  const onSubmit = async (rating) => {
+    try{
+      const response = await axiosInstance.post(`/reviews/${otherUserId}`, {starRating : rating})
+      console.log(response)
+      navigate('/')
+    } catch(e) {
+      console.error('review Submit Failed : ',e)
+    }
+  }
 
   return (
     <div className='flex flex-row justify-center space-x-16 p-16'>
@@ -156,8 +169,9 @@ function ChatPage() {
       </div>
       <div className={`transition-all duration-300 ease-in-out transform
       ${showSchedule ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-5"}`}>
-        {showSchedule && <ScheduleContainer />}
+        {showSchedule && <ScheduleContainer roomId={roomId} selectedTimes={selectedTimes} setSelectedTimes={setSelectedTimes}/>}
       </div>
+      {complete && <RatingModal onSubmit={onSubmit} />}
     </div>
   );
 }

@@ -2,8 +2,7 @@ import SchedulePicker from "./SchedulePicker";
 import axiosInstance from "../../api/axiosInstance";
 import React, { useCallback, useEffect, useState } from "react";
 
-const ScheduleContainer = ({roomId}) => {
-    const [selectedTimes, setSelectedTimes] = useState({});
+const ScheduleContainer = ({roomId, selectedTimes, setSelectedTimes}) => {
     const [availableTimes, setAvailableTimes] = useState({});
 
     // 금일로부터 7일, 09시~21시
@@ -23,6 +22,10 @@ const ScheduleContainer = ({roomId}) => {
                 setAvailableTimes(response.data.results.availableTimes)
             } catch (e) {
                 console.error('fetch failed : ',e)
+                setAvailableTimes({
+                    '2024-12-15' : [9,10,11],
+                    '2024-12-16' : [13,15,16],
+                })
             }
         }
         fetchAvailableTime()

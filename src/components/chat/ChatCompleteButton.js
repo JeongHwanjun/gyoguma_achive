@@ -11,7 +11,7 @@ const ChatCompleteButton = ({ Complete, setComplete }) => {
             : "bg-green-500 text-white hover:bg-green-600"
         }`}
       >
-        {Complete ? "거래 완료 대기 중" : "거래 완료"}
+        {Complete ? "종료된 거래" : "거래 완료"}
       </button>
     </div>
   );
