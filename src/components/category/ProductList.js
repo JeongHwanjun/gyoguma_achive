@@ -15,10 +15,12 @@ const ProductList = () => {
     hasMore
   } = useSelector((state) => state.product);
 
+  //무한 스크롤 구현
   // 마지막 아이템의 ref를 저장할 변수
   const observer = useRef();
 
-  // 마지막 아이템을 관찰하는 콜백
+  // IntersectionObserver를 사용해 마지막 상품이 화면에 보이면
+  // 추가 데이터를 불러옴
   const lastProductRef = useCallback(node => {
     if (loading) return;
 
@@ -26,6 +28,7 @@ const ProductList = () => {
 
     observer.current = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting && hasMore) {
+        // 카테고리별 또는 전체 상품 추가 로딩
         if (currentCategory && currentCategory !== 'all') {
           dispatch(fetchProductsByCategory({
             categoryId: currentCategory,
@@ -38,9 +41,11 @@ const ProductList = () => {
     });
 
     if (node) observer.current.observe(node);
-  }, [loading, hasMore, currentCategory, products.length, categoryProducts]);
+  }, [loading, hasMore, currentCategory, products.length, categoryProducts, dispatch]);
 
+  //초기 데이터 로딩
   useEffect(() => {
+    //카테고리가 변경될 때마다 해당 카테고리 상품 불러옴
     if (currentCategory && currentCategory !== 'all') {
       dispatch(fetchProductsByCategory({ categoryId: currentCategory, page: 1 }));
     } else {

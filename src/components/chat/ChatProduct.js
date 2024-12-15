@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import axiosInstance from "../../api/axiosInstance";
+
 // 채팅과 관련있는 상품을 표시하는 컴포넌트
 const ChatProduct = ({ product }) => {
   return (

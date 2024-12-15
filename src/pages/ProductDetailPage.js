@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchProductById, clearCurrentProduct } from "../redux/slices/productSlice";
+import axiosInstance from "../api/axiosInstance";
 
 const categoryMap = {
   1: "전공서적",
@@ -21,29 +22,74 @@ const statusMap = {
 };
 
 function ProductDetailPage() {
-  const { id } = useParams();
+  const { productId } = useParams();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   // Redux state 구조에 맞게 selector 수정
   const currentProduct = useSelector(state => state.product.currentProduct);
   const loading = useSelector(state => state.product.loading);
   const error = useSelector(state => state.product.error);
+  const { userId } = useSelector(state => state.auth)
 
 
   useEffect(() => {
     // ID가 유효한지 확인
-    if (!id) {
+    if (!productId) {
       console.error("Invalid product ID");
       return;
     }
-    console.log("Fetching product with ID:", id); // 디버깅용
-    dispatch(fetchProductById(id));
+    console.log("Fetching product with ID:", productId); // 디버깅용
+    dispatch(fetchProductById(productId));
 
     // Cleanup function
     return () => {
       dispatch(clearCurrentProduct());
     };
-  }, [dispatch, id]);
+  }, [dispatch, productId]);
+
+  const createOrGetChatRoom = async () => {
+    const buyerId = userId // 상품을 보는 사용자가 구매자임
+    try{
+      const existRoomResponse = await axiosInstance.get(`/chat/buyer/${buyerId}`)
+      const existRooms = existRoomResponse.data
+      const existingRoom = existRooms?.find(
+        (room) =>
+          room.buyer === buyerId && room.product === productId
+      );
+      //채팅방이 이미 있는가?
+      if(existingRoom) {
+        //채탕방이 있다면 그 채팅방으로 이동
+        return existingRoom.roomId
+      } 
+      // 채팅방이 없다면 새로 생성
+      // /members/products/{productId} 를 통해 sellerId를 받아올 수 있음.
+      const sellerIdResponse = await axiosInstance.get(`/members/products/${productId}`)
+      const sellerId = sellerIdResponse.data.userId
+      // 받아온 데이터를 기반으로 신규 채팅방 생성
+      const createRoomResponse = await axiosInstance.post("/chat", {
+        buyer: buyerId,
+        seller: sellerId,
+        product: productId,
+        senderId: buyerId,
+      });
+
+      // 새로 생성된 roomId 반환
+      return createRoomResponse.data.roomId; 
+    } catch (error) {
+      console.error("Error while creating or fetching chat room:", error);
+      throw error;
+    }
+  }
+
+  const moveToChat = async () => {
+    try {
+      const roomId = await createOrGetChatRoom()
+      navigate(`/chat/transaction:${roomId}`)
+    } catch(e) {
+      console.error('채팅방 이동 실패 : ', error)
+    }
+  }
 
   if (loading) {
     return <div className="flex justify-center items-center h-screen">로딩중...</div>;
@@ -97,7 +143,8 @@ function ProductDetailPage() {
                 <button className="flex-1 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700">
                   구매하기
                 </button>
-                <button className="flex-1 py-3 border border-green-600 text-green-600 rounded-lg hover:bg-green-50">
+                <button className="flex-1 py-3 border border-green-600 text-green-600 rounded-lg hover:bg-green-50"
+                onClick={moveToChat}>
                   채팅하기
                 </button>
               </div>

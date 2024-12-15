@@ -1,42 +1,82 @@
 // src/components/dashboard/AuthButton.js
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import axiosInstance from '../../api/axiosInstance';
+import { useDispatch } from 'react-redux';
+import { loginSuccess, setError } from '../../redux/slices/authSlice'
 
 function AuthButton() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // URL의 토큰 파라미터 체크
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const accessToken = params.get('access_token');
+    const refreshToken = params.get('refresh_token');
+
+    if (accessToken && refreshToken) {
+      // 토큰 저장
+      localStorage.setItem('access_token', accessToken);
+      localStorage.setItem('refresh_token', refreshToken);
+
+      // URL 파라미터 제거
+      window.history.replaceState({}, document.title, window.location.pathname);
+
+      // 토큰을 받아온 후, 해당 토큰을 인증에 사용해 사용자 정보 받아옴
+      const getUserEmail = async () => {
+        try {
+          const responseID = await axiosInstance.get('/token/users');
+          const userId = responseID.data.userId
+          const responseALL = await axiosInstance.get(`/members/${userId}`)
+          const responseEmail = await axiosInstance.get('/members/byToken');
+
+          const userEmail = responseEmail.data.email
+          const userNickName = responseALL.data.result.nickname
+          const userRating = responseALL.data.result.rating
+          console.log('User Email:', userEmail)
+          console.log('User ID : ',userId)
+          // dispatch로 전역에서 이용할 수 있도록 redux state 갱신
+          dispatch(loginSuccess({userEmail, userId, userNickName, userRating, accessToken, refreshToken}))
+          // 이후 원하는 컴포넌트에서 useSelector로 언제든 로그인 정보 이용 가능
+        } catch (error) {
+          console.error('Failed to fetch user email:', error);
+          dispatch(setError(error))
+        }
+      }
+
+      getUserEmail()
+
+      // 홈으로 리다이렉트 (또는 원하는 페이지로)
+      //navigate('/');
+    }
+  }, [navigate, dispatch]);
+
   const handleLogin = async () => {
     try {
-      // OAuth2 인증 시작을 위한 URL 얻기
-      const response = await axiosInstance.get('/oauth2/authorization/google');
-
-      // 받은 URL로 리다이렉트
-      if (response.data?.redirectUrl) {
-        window.location.href = response.data.redirectUrl;
-      } else {
-        // 또는 직접 OAuth2 URL로 이동
-        window.location.href = 'http://localhost:8080/oauth2/authorization/google';
-      }
+      window.location.href = 'http://localhost:8080/oauth2/authorization/google';
     } catch (error) {
       console.error('Login failed:', error);
-      // 에러 발생시 직접 OAuth2 URL로 이동 시도
-      window.location.href = 'http://localhost:8080/oauth2/authorization/google';
     }
   };
 
   return (
     <div className="flex items-center gap-4">
-      <button
-        onClick={handleLogin}
-        className="text-gyoguma-dark hover:text-gyoguma"
-      >
-        로그인
-      </button>
-      <Link
-        to="/register"
-        className="px-4 py-2 bg-gyoguma text-white rounded-lg hover:bg-gyoguma-dark"
-      >
-        회원가입
-      </Link>
+        <>
+          <button
+            onClick={handleLogin}
+            className="text-gyoguma-dark hover:text-gyoguma"
+          >
+            로그인
+          </button>
+          <Link
+            to="/register"
+            className="px-4 py-2 bg-gyoguma text-white rounded-lg hover:bg-gyoguma-dark"
+          >
+            회원가입
+          </Link>
+        </>
     </div>
   );
 }

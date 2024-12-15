@@ -10,7 +10,7 @@ export const API = {
       axiosInstance.get(`/products/${productId}`),
 
     create: (data) =>
-      axiosInstance.post("/products", data),
+      axiosInstance.post("/products/", data),
 
     update: (productId, data) =>
       axiosInstance.patch(`/products/${productId}`, data),
@@ -53,4 +53,31 @@ export const API = {
     create: (memberId, data) =>
       axiosInstance.post(`/reviews/${memberId}`, data),
   },
+
+  chat: {
+    // 채팅방 생성 요청
+    create: (buyerId, sellerId, productId) =>
+      axiosInstance.post("/chat", {
+        buyer: buyerId,
+        seller: sellerId,
+        product: productId
+      }),
+
+    // 채팅방 입장 요청
+    enter: (roomId, userId) =>
+      axiosInstance.post(`/chat/${roomId}/${userId}`),
+
+    // userId별 채팅방 요청
+    getUserRooms: (userId) =>
+      axiosInstance.get(`/chat/user/${userId}`),
+
+    // 기존 채팅방의 메세지 요청
+    getMessages: (roomId) =>
+      axiosInstance.get(`/chat/${roomId}`),
+
+    // 채팅방 삭제 요청
+    delete: (roomId) =>
+      axiosInstance.delete(`/chat/${roomId}`),
+  }
+
 };
