@@ -2,7 +2,7 @@
 // HomePage.js 또는 ProductListPage.js
 import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import ProductCard from '../components/category/ProductCard';
 import {
   setCurrentCategory,
@@ -127,14 +127,21 @@ const HomePage = () => {
         {currentProducts.map((product, index) => {
           if (!product) return null;
 
+          // 고유한 key 생성을 위해 productId와 index를 조합
+          const uniqueKey = `${product.productId}-${index}`;
+
           if (currentProducts.length === index + 1) {
             return (
-              <div ref={lastProductElementRef} key={index}>
-                <ProductCard product={product} />
-              </div>
+                <div ref={lastProductElementRef} key={uniqueKey}>
+                  <ProductCard product={product} />
+                </div>
             );
           }
-          return <ProductCard key={product.productId} product={product} />;
+          return (
+              <div key={uniqueKey}>
+                <ProductCard product={product} />
+              </div>
+          );
         })}
       </div>
 

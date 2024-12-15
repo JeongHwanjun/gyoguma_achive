@@ -1,22 +1,31 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import React from "react";
+import React, {useEffect} from "react";
 import Layout from "./components/layout/Layout";
+import MyItems from './pages/MyItems';
 
 import HomePage from "./pages/HomePage";
 //import AuthPage from "./pages/AuthPage";
 import CategoryPage from "./pages/CategoryPage";
 import ChatMainPage from "./pages/ChatMainPage";
 import ChatPage from "./pages/ChatPage";
-import MyPage from "./pages/MyPage";
+//import MyPage from "./pages/MyPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import ProductListPage from "./pages/ProductListPage";
-import AuthCallback from './pages/AuthCallback';
+//import AuthCallback from './pages/AuthCallback';
 //import ChatRoomList from './pages/ChatRoomList';
 //import ChatRoom from './pages/ChatRoom';
 import AddInfoPage from "./pages/AddInfoPage";
 import WritePage from "./pages/WritePage";
+import {useDispatch} from "react-redux";
+import {checkAuthStatus} from "./redux/slices/authSlice";
 
 function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(checkAuthStatus());
+  }, [dispatch]);
+
   return (
     <BrowserRouter>
       <Routes>
@@ -41,7 +50,7 @@ function App() {
           <Route path="/chat/user" element={<ChatMainPage />} />
           <Route path="/chat/:roomId" element={<ChatPage />} />
           {/* 마이페이지 */}
-          <Route path="/mypage" element={<MyPage />} />
+          <Route path="/my-items" element={<MyItems />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -18,8 +18,8 @@ export const API = {
     delete: (productId) =>
       axiosInstance.delete(`/products/${productId}`),
 
-    getByMember: (memberId) =>
-      axiosInstance.get(`/products/${memberId}`),
+    getByMember: (memberId, page) =>
+        axiosInstance.get(`/products/members/${memberId}`, { params: { page } }),
 
     search: (keyword) =>
       axiosInstance.get("/products/search", { params: { keyword } }),
