@@ -134,7 +134,7 @@ const HomePage = () => {
               </div>
             );
           }
-          return <ProductCard key={index} product={product} />;
+          return <ProductCard key={product.productId} product={product} />;
         })}
       </div>
 

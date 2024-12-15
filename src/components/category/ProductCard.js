@@ -80,6 +80,6 @@ const ProductCard = ({ product }) => {
       </div>
     </Link>
   );
-};
+}
 
-export default ProductCard;
+export default React.memo(ProductCard)

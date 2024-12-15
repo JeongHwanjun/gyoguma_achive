@@ -1,6 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from "../../api/axiosInstance";
-import initialState from "./productInitialState"
+import initialState from "./productInitialState";
+
+// 이미지 캐시를 관리하는 Map 객체
+const imageCache = new Map();
 
 export const fetchProductsByCategory = createAsyncThunk(
   'products/fetchByCategory',
@@ -12,29 +15,41 @@ export const fetchProductsByCategory = createAsyncThunk(
         const { totalPage } = firstPageResponse.data.result;
         let allProducts = [...firstPageResponse.data.result.productList];
 
-        for(let page = 2; page <= totalPage; page++) {
+        for (let page = 2; page <= totalPage; page++) {
           const response = await axiosInstance.get(`/products/?page=${page}`);
           if (response.data.isSuccess) {
             allProducts = [...allProducts, ...response.data.result.productList];
           }
         }
 
-        // 각 상품의 이미지 정보를 함께 가져오기
-        const productsWithImages = await Promise.all(allProducts.map(async (product) => {
-          try {
-            const imageResponse = await axiosInstance.get(`/products/${product.productId}/images`);
-            if (imageResponse.data.isSuccess) {
+        // 각 상품의 이미지 정보를 캐싱하여 가져오기
+        const productsWithImages = await Promise.all(
+          allProducts.map(async (product) => {
+            if (imageCache.has(product.productId)) {
+              // 캐시에 이미지가 있는 경우, 캐시된 데이터를 사용
               return {
                 ...product,
-                images: imageResponse.data.result.images || []
+                images: imageCache.get(product.productId),
               };
             }
-            return product;
-          } catch (error) {
-            console.error('Image fetch error:', error);
-            return product;
-          }
-        }));
+
+            try {
+              const imageResponse = await axiosInstance.get(`/products/${product.productId}/images`);
+              if (imageResponse.data.isSuccess) {
+                const images = imageResponse.data.result.images || [];
+                imageCache.set(product.productId, images); // 캐시에 저장
+                return {
+                  ...product,
+                  images,
+                };
+              }
+              return product;
+            } catch (error) {
+              console.error('Image fetch error:', error);
+              return product;
+            }
+          })
+        );
 
         return {
           products: productsWithImages,
@@ -51,16 +66,30 @@ export const fetchProductById = createAsyncThunk(
   'products/fetchById',
   async (id, { rejectWithValue }) => {
     try {
+      // 캐시를 확인하여 이미지 요청 최소화
+      if (imageCache.has(id)) {
+        const productResponse = await axiosInstance.get(`/products/${id}`);
+        if (productResponse.data.isSuccess) {
+          return {
+            ...productResponse.data.result,
+            images: imageCache.get(id),
+          };
+        }
+        return rejectWithValue(productResponse.data.message);
+      }
+
       // 상품 정보와 이미지 정보를 동시에 가져오기
       const [productResponse, imageResponse] = await Promise.all([
         axiosInstance.get(`/products/${id}`),
-        axiosInstance.get(`/products/${id}/images`)
+        axiosInstance.get(`/products/${id}/images`),
       ]);
 
       if (productResponse.data.isSuccess) {
+        const images = imageResponse.data.isSuccess ? imageResponse.data.result.images : [];
+        imageCache.set(id, images); // 캐시에 저장
         return {
           ...productResponse.data.result,
-          images: imageResponse.data.isSuccess ? imageResponse.data.result.images : []
+          images,
         };
       }
       return rejectWithValue(productResponse.data.message);
@@ -109,7 +138,7 @@ const productSlice = createSlice({
       })
       .addCase(fetchProductsByCategory.fulfilled, (state, action) => {
         state.loading = false;
-        const { products, hasMore, totalPages, totalElements } = action.payload;
+        const { products } = action.payload;
 
         // 카테고리별 필터링
         const filteredByCategory = state.currentCategory === 'all'
@@ -124,12 +153,12 @@ const productSlice = createSlice({
               product.title?.toLowerCase().includes(state.searchWord?.toLowerCase())
             )
           : filteredByCategory;
-        
+
         // 정렬
         const sorted = [...filteredBySearchWord].sort((a, b) => {
           const valueA = state.sortCriteria === 'price' ? a.price : new Date(a.createdAt);
           const valueB = state.sortCriteria === 'price' ? b.price : new Date(b.createdAt);
-      
+
           if (state.sortDirection === 'asc') {
             return valueA > valueB ? 1 : -1;
           } else {
@@ -138,21 +167,6 @@ const productSlice = createSlice({
         });
 
         state.categoryProducts[state.currentCategory] = sorted;
-
-        /*
-        if (state.page === 1) {
-          state.categoryProducts[state.currentCategory] = filteredBySearchWord;
-        } else {
-          state.categoryProducts[state.currentCategory] = [
-            ...state.categoryProducts[state.currentCategory],
-            ...filteredBySearchWord
-          ];
-        }
-          */
-
-        state.hasMore = hasMore;
-        state.totalPages = totalPages;
-        state.totalElements = totalElements;
         state.error = null;
       })
       .addCase(fetchProductsByCategory.rejected, (state, action) => {
@@ -174,7 +188,7 @@ const productSlice = createSlice({
         state.error = action.payload || '상품 조회 실패';
         state.currentProduct = null;
       });
-  }
+  },
 });
 
 export const {
@@ -183,7 +197,7 @@ export const {
   setSearchWord,
   clearCurrentProduct,
   setSortCriteria,
-  setSortDirection
+  setSortDirection,
 } = productSlice.actions;
 
 export default productSlice.reducer;
