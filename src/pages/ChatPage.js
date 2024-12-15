@@ -142,6 +142,8 @@ function ChatPage() {
     try{
       const response = await axiosInstance.post(`/reviews/${otherUserId}`, {starRating : rating})
       console.log(response)
+      console.log('채팅방을 삭제합니다')
+      await axiosInstance.delete(`/chat/${roomId}`)
       navigate('/')
     } catch(e) {
       console.error('review Submit Failed : ',e)
@@ -164,6 +166,7 @@ function ChatPage() {
                 {showSchedule ? "스케줄표 OFF" : "스케줄표 ON"}
             </button>
           </div>
+          {/* 판매자만  */}
           <ChatCompleteButton Complete={complete} setComplete={setComplete} />
         </div>
       </div>
