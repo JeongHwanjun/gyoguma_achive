@@ -5,7 +5,7 @@ import axiosInstance from '../../api/axiosInstance';
 const initialState = {
   isAuthenticated: false,
   userEmail: null,
-  memberId: null,
+  userId: null,
   loading: false,
   error: null
 };
@@ -41,7 +41,7 @@ export const login = createAsyncThunk(
 
       const userData = {
         userEmail: credentials.email,
-        memberId: response.data.result.memberId // 또는 실제 필드명
+        userId: response.data.result.userId // 또는 실제 필드명
       };
 
       console.log('10. 최종 userData:', userData);
@@ -56,7 +56,7 @@ export const login = createAsyncThunk(
 );
 
 export const checkAuthStatus = createAsyncThunk(
-    'auth/checkStatus',
+    'auth/checkAuthStatus',
     async (_, { rejectWithValue }) => {
       const accessToken = localStorage.getItem('access_token');
       const refreshToken = localStorage.getItem('refresh_token');
@@ -68,6 +68,7 @@ export const checkAuthStatus = createAsyncThunk(
       try {
         const decodedToken = jwtDecode(accessToken);
         const currentTime = Date.now() / 1000;
+        console.log("decondedToken : ",decodedToken)
 
         if (decodedToken.exp < currentTime) {
           // 토큰이 만료된 경우
@@ -85,9 +86,10 @@ export const checkAuthStatus = createAsyncThunk(
           };
         }
 
+        
         return {
           userEmail: decodedToken.email,
-          memberId: decodedToken.memberId,
+          userId: decodedToken.userId,
           accessToken,
           refreshToken
         };
@@ -134,7 +136,6 @@ const authSlice = createSlice({
       state.refreshToken = null;
       state.isAuthenticated = false;
       state.userEmail = null;
-      state.memberId = null;
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
     },
@@ -154,7 +155,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.isAuthenticated = true;
         state.userEmail = action.payload.userEmail;
-        state.memberId = action.payload.memberId;
+        state.userId = action.payload.userId;
         state.error = null;
       })
       .addCase(login.rejected, (state, action) => {
@@ -169,10 +170,10 @@ const authSlice = createSlice({
         .addCase(checkAuthStatus.fulfilled, (state, action) => {
           state.loading = false;
           state.isAuthenticated = true;
-          state.userEmail = action.payload.userEmail;
-          state.memberId = action.payload.memberId;
-          state.accessToken = action.payload.accessToken;
-          state.refreshToken = action.payload.refreshToken;
+          state.userEmail = action.payload.userEmail || state.userEmail;
+          state.userId = action.payload.userId || state.userId;
+          state.accessToken = action.payload.accessToken || state.accessToken;
+          state.refreshToken = action.payload.refreshToken || state.refreshToken;
         })
         .addCase(checkAuthStatus.rejected, (state) => {
           state.loading = false;

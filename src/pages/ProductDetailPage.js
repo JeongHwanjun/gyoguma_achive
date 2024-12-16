@@ -91,7 +91,7 @@ function ProductDetailPage() {
     const moveToChat = async () => {
         try {
             const roomId = await createOrGetChatRoom()
-            navigate(`/chat/transaction:${roomId}`)
+            navigate(`/chat/${roomId}`)
         } catch (e) {
             console.error('채팅방 이동 실패 : ', error)
         }
@@ -174,7 +174,7 @@ function ProductDetailPage() {
                     <div className="bg-white rounded-lg shadow-md p-6">
                         <div className="text-gray-600 space-y-4">
                             {/* 판매자 정보 */}
-                            <p className="text-lg pb-2 border-b">{`판매자: ${currentProduct.memberInfo.nickname}`}</p>
+                            <p className="text-lg pb-2 border-b">{`판매자: ${currentProduct.memberInfo.name}`}</p>
 
                             {/* 거래 장소 */}
                             <div className="border-b pb-4">

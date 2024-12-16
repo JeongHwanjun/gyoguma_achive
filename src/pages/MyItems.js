@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/category/ProductCard';
 import {API} from '../api/index'
+import { withAuth } from '../components/utils/withAuth';
 
 const MyItems = () => {
     const [products, setProducts] = useState([]);
@@ -128,4 +129,4 @@ const MyItems = () => {
     );
 };
 
-export default MyItems;
+export default withAuth(MyItems);

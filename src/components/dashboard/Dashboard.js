@@ -13,7 +13,7 @@ import React, { useEffect, useCallback } from "react";
 function Dashboard() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated, userNickName, userId, userRating } = useSelector(state => state.auth);
+  const { isAuthenticated, userName, userRating } = useSelector(state => state.auth);
   const handleLogout = useCallback(async () => {
     
     try {
@@ -33,7 +33,7 @@ function Dashboard() {
     <nav className="flex items-center gap-6">
       {isAuthenticated ? (
         <>
-          <UserProfile userNickName={userNickName} userRating={userRating} />
+          <UserProfile userName={userName} userRating={userRating} />
           <ChatButton />
           <button
           onClick={handleLogout}

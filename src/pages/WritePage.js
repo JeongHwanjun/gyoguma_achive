@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import ProductForm from '../components/Write/ProductForm'
 import { useSelector } from 'react-redux';
+import { withAuth } from '../components/utils/withAuth';
 
 const WritePage = () => {
 
@@ -34,15 +35,6 @@ const WritePage = () => {
     categoryValid: false,
     placeValid: false,
   });
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      console.log('Auth state changed:' , { isAuthenticated, userId: userId });
-      alert('로그인이 필요한 서비스입니다.');
-      navigate('/');
-    }
-  }, [isAuthenticated, userId, navigate]);
-
 
   useEffect(() => 
     console.log('Auth state changed:', { isAuthenticated, userId: userId })
@@ -160,6 +152,12 @@ const WritePage = () => {
       return response;
     } catch (error) {
       console.error('이미지 업로드 에러:', error.response?.data || error);
+      const errorData = error.response.data;
+
+      if (errorData.result.includes("givenDate")){
+        throw new Error('오늘 찍은 사진이 아닙니다.');
+
+      }
       throw new Error('이미지 업로드에 실패했습니다.');
     }
   };
@@ -199,4 +197,4 @@ const WritePage = () => {
   );
 };
 
-export default WritePage;
+export default withAuth(WritePage);

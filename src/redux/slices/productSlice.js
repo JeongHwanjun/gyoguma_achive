@@ -71,7 +71,7 @@ export const fetchProductById = createAsyncThunk(
         const productResponse = await axiosInstance.get(`/products/${id}`);
         if (productResponse.data.isSuccess) {
           return {
-            ...productResponse.data.result.productInfo,
+            ...productResponse.data.result,
             images: imageCache.get(id),
           };
         }

@@ -1,14 +1,14 @@
 import { Link } from "react-router-dom";
 import { User, ChevronDown, Box, History, Store, UserCircle, Star } from "lucide-react";
 
-function UserProfile({ userNickName, userRating }) {
+function UserProfile({ userName, userRating }) {
   return (
       <div className="relative group">
         <button className="flex items-center gap-2 hover:text-gyoguma">
           <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center">
             <User className="w-5 h-5 text-gray-500" />
           </div>
-          <span className="text-gray-700">{userNickName}</span>
+          <span className="text-gray-700">{userName}</span>
           <ChevronDown className="w-4 h-4 text-gray-500" />
         </button>
 

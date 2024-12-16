@@ -12,12 +12,12 @@ import uiReducer from './slices/uiSlice';
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth'] // 인증 정보만 로컬 스토리지에 저장
+  //whitelist: ['auth'] // 인증 정보만 로컬 스토리지에 저장
 };
 
 const persistedAuthReducer = persistReducer(persistConfig, authReducer);
 
-export const store = configureStore({
+const store = configureStore({
   reducer: {
     auth: persistedAuthReducer,
     product: productReducer,
@@ -32,3 +32,4 @@ export const store = configureStore({
 });
 
 export const persistor = persistStore(store);
+export default store
