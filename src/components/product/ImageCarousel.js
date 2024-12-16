@@ -1,77 +1,120 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-const ImageCarousel = ({ images = [], onThumbnailClick }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const chevronWidth = 40;
+const ImageCarousel = ({ images }) => {
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0); // 선택된 큰 이미지
+    const [thumbnailStartIndex, setThumbnailStartIndex] = useState(0); // 썸네일 시작 인덱스
+    const thumbnailsToShow = 4; // 한 번에 보여줄 썸네일 개수
 
-  const handlePrevious = () => {
-    setCurrentIndex(current =>
-      current === 0 ? images.length - 1 : current - 1
+    // 현재 표시할 썸네일 배열
+    const displayedThumbnails = images.slice(
+        thumbnailStartIndex,
+        thumbnailStartIndex + thumbnailsToShow
     );
-  };
 
-  const handleNext = () => {
-    setCurrentIndex(current =>
-      current === images.length - 1 ? 0 : current + 1
+    const handleThumbnailClick = (index) => {
+        setSelectedImageIndex(index);
+    };
+
+    const handlePrevClick = () => {
+        if (selectedImageIndex > 0) {
+            const newIndex = selectedImageIndex - 1;
+            setSelectedImageIndex(newIndex);
+
+            // 썸네일 범위 조정
+            if (newIndex < thumbnailStartIndex) {
+                setThumbnailStartIndex((prev) => Math.max(0, prev - 1));
+            }
+        }
+    };
+
+    const handleNextClick = () => {
+        if (selectedImageIndex < images.length - 1) {
+            const newIndex = selectedImageIndex + 1;
+            setSelectedImageIndex(newIndex);
+
+            // 썸네일 범위 조정
+            if (newIndex >= thumbnailStartIndex + thumbnailsToShow) {
+                setThumbnailStartIndex((prev) =>
+                    Math.min(images.length - thumbnailsToShow, prev + 1)
+                );
+            }
+        }
+    };
+
+    return (
+        <div className="flex flex-col items-center space-y-4">
+            {/* 큰 이미지 표시 */}
+            <div className="w-full max-w-lg">
+                <img
+                    src={images[selectedImageIndex].storedFileName}
+                    alt={`Selected ${selectedImageIndex}`}
+                    className="w-full h-[468px] rounded-lg object-contain"
+                />
+            </div>
+
+            {/* 썸네일과 컨트롤 */}
+            <div className="flex items-center space-x-2">
+                {/* 이전 화살표 */}
+                <button
+                    onClick={handlePrevClick}
+                    disabled={selectedImageIndex === 0}
+                    className={`p-2 rounded-full border ${
+                        selectedImageIndex === 0 ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                >
+                    ◀
+                </button>
+
+                {/* 썸네일 리스트 */}
+                <div className="flex space-x-2 overflow-hidden">
+                    {displayedThumbnails.map((thumbnail, index) => {
+                        const actualIndex = thumbnailStartIndex + index;
+                        return (
+                            <button
+                                key={actualIndex}
+                                onClick={() => handleThumbnailClick(actualIndex)}
+                                className={`border-2 rounded-md ${
+                                    actualIndex === selectedImageIndex
+                                        ? "border-green-500"
+                                        : "border-gray-300"
+                                }`}
+                            >
+                                <img
+                                    src={thumbnail.storedFileName}
+                                    alt={`Thumbnail ${actualIndex}`}
+                                    className="w-20 h-20 object-cover"
+                                />
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* 다음 화살표 */}
+                <button
+                    onClick={handleNextClick}
+                    disabled={selectedImageIndex === images.length - 1}
+                    className={`p-2 rounded-full border ${
+                        selectedImageIndex === images.length - 1
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                    }`}
+                >
+                    ▶
+                </button>
+            </div>
+
+            {/* 스크롤바 */}
+            <div className="relative w-full max-w-lg h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                    className="absolute h-full bg-green-500"
+                    style={{
+                        width: `${((selectedImageIndex + 1) / images.length) * 100}%`,
+                        transition: "width 0.3s ease",
+                    }}
+                ></div>
+            </div>
+        </div>
     );
-  };
-
-  return (
-    <div className="w-full">
-      {/* 메인 이미지 */}
-      <div className="relative px-16 aspect-square">
-        <div className="w-full h-full flex justify-center items-center bg-gray-100 rounded-lg">
-          {images.length > 0 ? (
-            <img
-              src={images[currentIndex]}
-              alt={`상품 이미지 ${currentIndex + 1}`}
-              className="max-w-full max-h-96 object-contain"
-            />
-          ) : (
-            <span className="text-gray-400">이미지 없음</span>
-          )}
-        </div>
-
-        {/* 이전/다음 버튼 */}
-        {images.length > 1 && (
-          <>
-            <button
-              onClick={handlePrevious}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2"
-            >
-              <img src="/images/arrow.png" alt="이전" className="w-10 h-10 rotate-180" />
-            </button>
-            <button
-              onClick={handleNext}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2"
-            >
-              <img src="/images/arrow.png" alt="다음" className="w-10 h-10" />
-            </button>
-          </>
-        )}
-      </div>
-
-      {/* 썸네일 목록 */}
-      {images.length > 1 && (
-        <div className="mt-4 grid grid-cols-4 gap-2 px-4">
-          {images.map((image, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentIndex(index)}
-              className={`aspect-square rounded-lg overflow-hidden border-2 
-                ${currentIndex === index ? 'border-green-500' : 'border-transparent'}`}
-            >
-              <img
-                src={image}
-                alt={`썸네일 ${index + 1}`}
-                className="w-full h-full object-cover"
-              />
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
 };
 
 export default ImageCarousel;

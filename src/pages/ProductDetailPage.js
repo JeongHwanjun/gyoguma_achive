@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
 import {useSelector, useDispatch} from "react-redux";
 import {fetchProductById, clearCurrentProduct} from "../redux/slices/productSlice";
+import ImageCarousel from "../components/product/ImageCarousel";
 import axiosInstance from "../api/axiosInstance";
 
 const categories = {
@@ -34,6 +35,7 @@ function ProductDetailPage() {
     const error = useSelector(state => state.product.error);
     const {userId} = useSelector(state => state.auth)
 
+
     useEffect(() => {
         // 맨 위로 스크롤
         window.scrollTo(0, 0);
@@ -46,7 +48,7 @@ function ProductDetailPage() {
 
         // Cleanup function
         return () => {
-            dispatch(clearCurrentProduct());
+            //dispatch(clearCurrentProduct());
         };
     }, [dispatch, productId]);
 
@@ -139,36 +141,7 @@ function ProductDetailPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* 왼쪽: 이미지 섹션 */}
-                    <div className="space-y-4">
-                        <div className="bg-white rounded-lg shadow-md p-4">
-                            <img
-                                src={currentProduct.images?.[selectedImage]?.storedFileName || "https://via.placeholder.com/400x400"}
-                                alt={currentProduct.productInfo.title}
-                                className="w-full aspect-square object-contain rounded-lg"
-                            />
-                        </div>
-                        {/* 썸네일 이미지들 */}
-                        {currentProduct.productInfo.images && currentProduct.productInfo.images.length > 1 && (
-                            <div className="grid grid-cols-5 gap-2">
-                                {currentProduct.productInfo.images.map((image, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => handleImageClick(index)}
-                                        className={`border-2 rounded-lg overflow-hidden ${
-                                            selectedImage === index ? "border-green-500" : "border-gray-200"
-                                        }`}
-                                    >
-                                        <img
-                                            src={image.storedFileName || "https://via.placeholder.com/80x80"}
-                                            alt={`${currentProduct.productInfo.title} ${index + 1}`}
-                                            className="w-full aspect-square object-cover"
-                                        />
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                    <ImageCarousel images={currentProduct.images} />
 
                     {/* 오른쪽: 정보 섹션 */}
                     <div className="bg-white rounded-lg shadow-md p-6">
@@ -181,8 +154,8 @@ function ProductDetailPage() {
                                 <div className="text-lg mb-2">
                                     <span className="font-medium">거래장소:</span>
                                     <span className="px-3 py-1.5 bg-gray-100 rounded-full ml-2">
-                  {locations[currentProduct.productInfo.locationId]?.name || "위치 정보 없음"}
-                </span>
+                                        {locations[currentProduct.productInfo.locationId]?.name || "위치 정보 없음"}
+                                    </span>
                                 </div>
                                 <div className="w-full h-[300px] rounded-lg overflow-hidden">
                                     <img

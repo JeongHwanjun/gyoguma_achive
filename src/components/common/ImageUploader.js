@@ -21,6 +21,8 @@ const ImageUploader = (props) => {
         });
 
         setSelectedFiles((prevFiles) => [...prevFiles, ...fileArray]);
+
+        e.target.value = null
     };
 
     // 이미지 삭제 기능 추가
