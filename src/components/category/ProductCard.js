@@ -46,7 +46,7 @@ const ProductCard = ({ product }) => {
           <img
             src={thumbnailUrl}
             alt={title}
-            className="w-full h-full object-cover rounded-t-lg"
+            className="w-full h-full object-contain rounded-t-lg bg-gray-200"
             onError={(e) => {
               if (e.target.src !== defaultImageUrl) {
                 e.target.src = defaultImageUrl;

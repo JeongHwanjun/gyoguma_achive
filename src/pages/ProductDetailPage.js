@@ -109,6 +109,8 @@ function ProductDetailPage() {
         return <div className="flex justify-center items-center h-screen">상품을 찾을 수 없습니다.</div>;
     }
 
+    console.log(currentProduct.images?.[selectedImage]?.storedFileName)
+
     return (
         <div className="container mx-auto p-6">
             {/* 전체를 감싸는 흰색 컨테이너 */}
@@ -141,9 +143,9 @@ function ProductDetailPage() {
                     <div className="space-y-4">
                         <div className="bg-white rounded-lg shadow-md p-4">
                             <img
-                                src={currentProduct.productInfo.images?.[selectedImage]?.storedFileName || "https://via.placeholder.com/400x400"}
+                                src={currentProduct.images?.[selectedImage]?.storedFileName || "https://via.placeholder.com/400x400"}
                                 alt={currentProduct.productInfo.title}
-                                className="w-full aspect-square object-cover rounded-lg"
+                                className="w-full aspect-square object-contain rounded-lg"
                             />
                         </div>
                         {/* 썸네일 이미지들 */}
