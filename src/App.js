@@ -34,7 +34,8 @@ function App() {
           <Route path="/users/addInfo" element={<AddInfoPage />} />
 
           {/* 상품 작성 관련 */}
-          <Route path="/write" element={<WritePage />} />
+          <Route path="/write" element={<WritePage isEdit={false} />} />
+          <Route path="/edit/:productId" element={<WritePage isEdit={true}/>} />
 
           {/* 카테고리 및 상품 관련 */}
           <Route path="/category" element={<CategoryPage />} />

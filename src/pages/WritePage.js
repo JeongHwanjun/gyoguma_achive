@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import ProductForm from '../components/Write/ProductForm'
 import { useSelector } from 'react-redux';
 import { withAuth } from '../components/utils/withAuth';
 
-const WritePage = () => {
-
+const WritePage = ({isEdit}) => {
   const authState = useSelector((state) => state.auth);
-  // userId를 memberId로 사용
+  const {currentProduct} = useSelector(state => state.product)
+  const productInfo = currentProduct.productInfo
   const { userId, isAuthenticated } = authState;
+  const productIdEdit = useParams()
 
-  // formData 초기화에서도 userId 사용
+  console.log(`isEdit : ${isEdit}`)
   const [formData, setFormData] = useState({
-    memberId: userId, // userId 사용
+    memberId: userId,
     title: '',
     price: '',
     description: '',
@@ -36,9 +37,33 @@ const WritePage = () => {
     placeValid: false,
   });
 
+  // 로그인 상태 변경 확인
   useEffect(() => 
     console.log('Auth state changed:', { isAuthenticated, userId: userId })
   , [isAuthenticated, userId]);
+
+  // 수정/작성 여부 확인, 수정일 시 기본값 지정
+  useEffect(() => {
+    if(!isEdit){ // 작성일 경우 그냥 진행
+      return
+    }
+
+    setFormData({
+      memberId : userId,
+      title : productInfo.title,
+      price : productInfo.price,
+      description : productInfo.description,
+      categoryId : 2, // 임시로 지정하기, 추후 productInfo에 카테고리 정보 추가 요망
+      locationId : productInfo.locationId,
+    })
+    setFeedback({
+      titleLength: 6,
+      titleValid: true,
+      priceValid: true,
+      categoryValid: true,
+      placeValid: true,
+    })
+  },[isEdit, productInfo, userId])
   
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -185,10 +210,44 @@ const WritePage = () => {
     }
   };
 
+  const onEdit = async (e) => {
+    e.preventDefault();
+
+    if (!feedback.priceValid || !feedback.titleValid ||
+      !feedback.categoryValid || !feedback.placeValid ||
+      selectedFiles.length === 0) {
+      alert('제출 내용을 확인해 주세요.');
+      return;
+    }
+
+    try {
+      const productData = {
+        title: formData.title,
+        price: Number(formData.price),
+        description: formData.description,
+        categoryId: Number(formData.categoryId),
+        locationId: Number(formData.locationId),
+        memberId: userId // userId를 숫자로 변환
+      };
+      const response = await axiosInstance.patch(`/products/${productIdEdit}`, productData)
+      const productId = response.data.result.productId
+      
+      console.log('patch on : ', productId)
+
+      if (productId) {
+        await uploadImages(productId);
+        navigate(`/product/${productId}`);
+      }
+    } catch (error) {
+      alert(error.message);
+      console.error('제품 수정 에러:', error);
+    }
+  }
+
   return (
     <ProductForm
       calculateProgress={calculateProgress}
-      onSubmit={onSubmit}
+      onSubmit={(isEdit ? onEdit : onSubmit)}
       setSelectedFiles={setSelectedFiles}
       handleChange={handleChange}
       formData={formData}

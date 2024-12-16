@@ -27,7 +27,7 @@ function Header() {
     <header className="bg-white shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2 max-sm:hidden">
             <img src="/images/logo.png" alt="교구마" className="h-10" />
             <span className="text-gyoguma-dark font-bold text-xl">교구마</span>
           </Link>

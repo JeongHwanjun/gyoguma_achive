@@ -1,6 +1,7 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
 import {useSelector, useDispatch} from "react-redux";
+import { Link } from "react-router-dom";
 import {fetchProductById, clearCurrentProduct} from "../redux/slices/productSlice";
 import ImageCarousel from "../components/product/ImageCarousel";
 import axiosInstance from "../api/axiosInstance";
@@ -27,13 +28,13 @@ const locations = {
 function ProductDetailPage() {
     const {productId} = useParams();
     const dispatch = useDispatch();
-    const [selectedImage, setSelectedImage] = useState(0);
     const navigate = useNavigate();
+    const [isSeller, setIsSeller] = useState(false);
 
     const currentProduct = useSelector(state => state.product.currentProduct);
     const loading = useSelector(state => state.product.loading);
     const error = useSelector(state => state.product.error);
-    const {userId} = useSelector(state => state.auth)
+    const {userId, userEmail} = useSelector(state => state.auth)
 
 
     useEffect(() => {
@@ -52,12 +53,15 @@ function ProductDetailPage() {
         };
     }, [dispatch, productId]);
 
-    const handleImageClick = (index) => {
-        setSelectedImage(index);
-    };
+    // 현재 사용자가 buyer인지 seller인지 파악
+    useEffect(() => {
+        if(userEmail === currentProduct?.memberInfo?.email) setIsSeller(true)
+        else setIsSeller(false)
+    },[currentProduct, userEmail])
 
     const createOrGetChatRoom = async () => {
-        const buyerId = userId // 상품을 보는 사용자가 구매자임
+        const buyerId = isSeller ? null : userId
+        console.log('buyerId : ',buyerId)
         try {
             const existRoomResponse = await axiosInstance.get(`/chat/buyer/${buyerId}`)
             const existRooms = existRoomResponse.data
@@ -99,6 +103,16 @@ function ProductDetailPage() {
         }
     }
 
+    const deleteProduct = useCallback(async () => {
+        try{
+            const response = await axiosInstance.delete(`/products/${productId}`)
+            if(response.isSuccess) console.log('상품 삭제 성공')
+            navigate('/')
+        } catch(e) {
+            console.error(e)
+        }
+    },[navigate, productId])
+
     if (loading) {
         return <div className="flex justify-center items-center h-screen">로딩중...</div>;
     }
@@ -111,7 +125,6 @@ function ProductDetailPage() {
         return <div className="flex justify-center items-center h-screen">상품을 찾을 수 없습니다.</div>;
     }
 
-    console.log(currentProduct.images?.[selectedImage]?.storedFileName)
 
     return (
         <div className="container mx-auto p-6">
@@ -170,13 +183,19 @@ function ProductDetailPage() {
                                 </div>
                             </div>
 
-                            {/* 채팅하기 버튼 */}
-                            <button
+                            {/* 버튼들 */}
+                            {!isSeller && <button
                                 className="w-full py-4 text-lg bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mt-4"
                                 onClick={moveToChat}
                             >
                                 채팅하기
-                            </button>
+                            </button>}
+                            {isSeller && <>
+                                <Link className="block w-full py-4 text-lg bg-green-600 text-center text-white rounded-lg hover:bg-green-700 transition-colors mt-6"
+                                to={`/edit/${productId}`}>수정하기</Link>
+                                <button className="w-full py-4 text-lg bg-red-500 text-white rounded-lg hover:bg-red-700 transition-colors mt-4"
+                                onClick={deleteProduct}>삭제하기</button>
+                            </>}
                         </div>
                     </div>
                 </div>
