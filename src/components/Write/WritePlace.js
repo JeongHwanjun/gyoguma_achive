@@ -8,7 +8,7 @@ const WritePlace = (props) => {
         '',
         'AI.jpg',
         'CentralLibrary.jpg',
-        'Gachon.jpg',
+        'GachonHall.jpg',
         'Pascucci.jpg',
         'StarBucks.jpg'
     ]
