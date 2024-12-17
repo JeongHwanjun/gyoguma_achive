@@ -11,7 +11,7 @@ const ChatParticipants = ({otherUser}) => {
                 />
                 <div className="flex flex-col">
                     <span className="text-lg font-semibold">{otherUser.nickname}</span>
-                    <span className="text-sm">★{otherUser.rating}</span>
+                    <span className="text-sm">★{Math.round(otherUser.rating)}</span>
                 </div>
 
             </div>

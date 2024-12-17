@@ -23,8 +23,6 @@ function ChatButton() {
           setIsStarting(false)
         } else if(chatCount > prevChatCount){
           setHasNewChat(true)
-        } else{
-          setHasNewChat(false)
         }
         setPrevChatCount(chatCount)
 
@@ -39,10 +37,14 @@ function ChatButton() {
     
     return () => clearInterval(Interval)
   },[userId, prevChatCount, isStarting])
+
+  const resetAlarm = () => {
+    setHasNewChat(false)
+  }
   return (
-    <Link to={'/chat/user'} className="text-gyoguma-dark hover:text-gyoguma">
+    <Link to={'/chat/user'} className="relative text-gyoguma-dark hover:text-gyoguma" onClick={resetAlarm}>
       채팅
-      {hasNewChat && <span className="absolute top-6 right-32 w-2 h-2 bg-red-500 rounded-full"></span>}
+      {hasNewChat && <span className="absolute w-2 h-2 bg-red-500 rounded-full"></span>}
     </Link>
   );
 }

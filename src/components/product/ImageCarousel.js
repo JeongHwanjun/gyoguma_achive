@@ -4,6 +4,7 @@ const ImageCarousel = ({ images }) => {
     const [selectedImageIndex, setSelectedImageIndex] = useState(0); // 선택된 큰 이미지
     const [thumbnailStartIndex, setThumbnailStartIndex] = useState(0); // 썸네일 시작 인덱스
     const thumbnailsToShow = 4; // 한 번에 보여줄 썸네일 개수
+    const defaultImageUrl = 'data:image/svg+xml;charset=UTF-8,%3csvg width="200" height="200" xmlns="http://www.w3.org/2000/svg"%3e%3crect width="200" height="200" fill="%23CCCCCC"/%3e%3ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23666666"%3e이미지 없음%3c/text%3e%3c/svg%3e';
 
     // 현재 표시할 썸네일 배열
     const displayedThumbnails = images.slice(
@@ -46,7 +47,7 @@ const ImageCarousel = ({ images }) => {
             {/* 큰 이미지 표시 */}
             <div className="w-full max-w-lg">
                 <img
-                    src={images[selectedImageIndex].storedFileName}
+                    src={images[selectedImageIndex]?.storedFileName || defaultImageUrl}
                     alt={`Selected ${selectedImageIndex}`}
                     className="w-full h-[468px] rounded-lg object-contain"
                 />
@@ -80,7 +81,7 @@ const ImageCarousel = ({ images }) => {
                                 }`}
                             >
                                 <img
-                                    src={thumbnail.storedFileName}
+                                    src={thumbnail?.storedFileName}
                                     alt={`Thumbnail ${actualIndex}`}
                                     className="w-20 h-20 object-cover"
                                 />

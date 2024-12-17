@@ -17,7 +17,7 @@ const ChatRoomCard = ({ room }) => {
   useEffect(() => {
     const fetchOtherUser = async () => {
       const response = await axiosInstance.get(`/members/${otherUserId}`)
-      setOtherUser({nickName : response.data.result.nickname, rating : response.data.result.rating})
+      setOtherUser({nickName : response.data.result.nickname, rating : Math.round(response.data.result.rating)})
     }
 
     fetchOtherUser()
